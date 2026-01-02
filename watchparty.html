@@ -117,17 +117,13 @@
         
         <div class="control-panel">
             <div class="input-group">
-                <input type="text" id="videoUrl" placeholder="Paste video URL here (YouTube, Vimeo, etc.)">
-                <button class="btn" onclick="loadVideo()">Load Video</button>
+                <input type="text" id="videoUrl" placeholder="Paste WatchParty.me URL here" value="https://www.watchparty.me/watch/female-back-grind">
+                <button class="btn" onclick="loadVideo()">Load Party</button>
             </div>
         </div>
         
         <div class="video-container">
-            <div class="placeholder" id="placeholder">
-                <div class="placeholder-icon">🎬</div>
-                <div>Enter a video URL above to start watching</div>
-            </div>
-            <iframe id="videoFrame" class="video-frame" src="about:blank" allowfullscreen></iframe>
+            <iframe id="videoFrame" class="video-frame" src="https://www.watchparty.me/watch/female-back-grind" allowfullscreen></iframe>
         </div>
     </div>
 
@@ -135,31 +131,9 @@
         function loadVideo() {
             const url = document.getElementById('videoUrl').value;
             const frame = document.getElementById('videoFrame');
-            const placeholder = document.getElementById('placeholder');
             
             if (url) {
-                let embedUrl = url;
-                
-                // Convert YouTube URL to embed
-                if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                    let videoId = '';
-                    if (url.includes('youtu.be/')) {
-                        videoId = url.split('youtu.be/')[1].split('?')[0];
-                    } else {
-                        const urlParams = new URLSearchParams(new URL(url).search);
-                        videoId = urlParams.get('v');
-                    }
-                    embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-                }
-                
-                // Convert Vimeo URL to embed
-                if (url.includes('vimeo.com')) {
-                    const videoId = url.split('/').pop();
-                    embedUrl = `https://player.vimeo.com/video/${videoId}?autoplay=1`;
-                }
-                
-                frame.src = embedUrl;
-                placeholder.style.display = 'none';
+                frame.src = url;
             }
         }
     </script>
