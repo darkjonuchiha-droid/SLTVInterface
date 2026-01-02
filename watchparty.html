@@ -166,32 +166,36 @@
             <div class="input-group">
                 <input type="text" id="videoUrl" placeholder="Paste WatchParty.me URL here" value="https://www.watchparty.me/watch/female-back-grind">
                 <button class="btn" onclick="loadVideo()">Load Party</button>
+                <button class="btn btn-fullscreen" onclick="redirectDirect()">🎮 SL Direct Mode</button>
             </div>
-            <div style="text-align: center; margin-top: 15px; opacity: 0.8;">
-                Redirecting to Watch Party...
+            <div style="text-align: center; margin-top: 10px; opacity: 0.7; font-size: 0.9em;">
+                Use "SL Direct Mode" if fullscreen doesn't work in Second Life
             </div>
+        </div>
+        
+        <div class="video-container" id="videoContainer">
+            <iframe id="videoFrame" class="video-frame" src="https://www.watchparty.me/watch/female-back-grind" allowfullscreen></iframe>
         </div>
     </div>
 
     <script>
         function loadVideo() {
             const url = document.getElementById('videoUrl').value;
+            const frame = document.getElementById('videoFrame');
             
             if (url) {
-                // Redirect directly to the URL instead of using iframe
-                window.location.href = url;
+                frame.src = url;
             }
         }
         
-        // Auto-redirect to the default watch party on load
-        window.onload = function() {
-            const defaultUrl = document.getElementById('videoUrl').value;
-            if (defaultUrl) {
-                setTimeout(() => {
-                    window.location.href = defaultUrl;
-                }, 500);
+        function redirectDirect() {
+            const url = document.getElementById('videoUrl').value;
+            
+            if (url) {
+                // Redirect directly to the URL for Second Life compatibility
+                window.location.href = url;
             }
-        };
+        }
     </script>
 </body>
 </html>
