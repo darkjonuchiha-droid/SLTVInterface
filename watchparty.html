@@ -19,6 +19,16 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            transition: padding 0.3s;
+        }
+        
+        body.fullscreen-mode {
+            padding: 0;
+            background: #000;
+        }
+        
+        body.fullscreen-mode h1 {
+            display: none;
         }
         
         .container {
@@ -42,6 +52,15 @@
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .control-panel.hidden {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
         }
         
         .input-group {
@@ -82,6 +101,33 @@
             box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
         }
         
+        .btn-fullscreen {
+            background: #FF9800;
+            margin-left: 10px;
+        }
+        
+        .btn-fullscreen:hover {
+            background: #F57C00;
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+        }
+        
+        .fullscreen-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        body.fullscreen-mode .fullscreen-controls {
+            opacity: 1;
+        }
+        
+        body:not(.fullscreen-mode) .fullscreen-controls {
+            display: none;
+        }
+        
         .video-container {
             flex: 1;
             background: #000;
@@ -115,19 +161,26 @@
     <div class="container">
         <h1>🎉 Watch Party</h1>
         
-        <div class="control-panel">
+        <div class="control-panel" id="controlPanel">
             <div class="input-group">
                 <input type="text" id="videoUrl" placeholder="Paste WatchParty.me URL here" value="https://www.watchparty.me/watch/female-back-grind">
                 <button class="btn" onclick="loadVideo()">Load Party</button>
+                <button class="btn btn-fullscreen" onclick="toggleFullscreen()">⛶ Fullscreen</button>
             </div>
         </div>
         
-        <div class="video-container">
+        <div class="video-container" id="videoContainer">
             <iframe id="videoFrame" class="video-frame" src="https://www.watchparty.me/watch/female-back-grind" allowfullscreen></iframe>
+        </div>
+        
+        <div class="fullscreen-controls">
+            <button class="btn btn-fullscreen" onclick="toggleFullscreen()">✕ Exit Fullscreen</button>
         </div>
     </div>
 
     <script>
+        let isFullscreen = false;
+        
         function loadVideo() {
             const url = document.getElementById('videoUrl').value;
             const frame = document.getElementById('videoFrame');
@@ -136,6 +189,27 @@
                 frame.src = url;
             }
         }
+        
+        function toggleFullscreen() {
+            isFullscreen = !isFullscreen;
+            const body = document.body;
+            const controlPanel = document.getElementById('controlPanel');
+            
+            if (isFullscreen) {
+                body.classList.add('fullscreen-mode');
+                controlPanel.classList.add('hidden');
+            } else {
+                body.classList.remove('fullscreen-mode');
+                controlPanel.classList.remove('hidden');
+            }
+        }
+        
+        // Allow ESC key to exit fullscreen
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isFullscreen) {
+                toggleFullscreen();
+            }
+        });
     </script>
 </body>
 </html>
