@@ -166,51 +166,32 @@
             <div class="input-group">
                 <input type="text" id="videoUrl" placeholder="Paste WatchParty.me URL here" value="https://www.watchparty.me/watch/female-back-grind">
                 <button class="btn" onclick="loadVideo()">Load Party</button>
-                <button class="btn btn-fullscreen" onclick="toggleFullscreen()">⛶ Fullscreen</button>
             </div>
-        </div>
-        
-        <div class="video-container" id="videoContainer">
-            <iframe id="videoFrame" class="video-frame" src="https://www.watchparty.me/watch/female-back-grind" allowfullscreen></iframe>
-        </div>
-        
-        <div class="fullscreen-controls">
-            <button class="btn btn-fullscreen" onclick="toggleFullscreen()">✕ Exit Fullscreen</button>
+            <div style="text-align: center; margin-top: 15px; opacity: 0.8;">
+                Redirecting to Watch Party...
+            </div>
         </div>
     </div>
 
     <script>
-        let isFullscreen = false;
-        
         function loadVideo() {
             const url = document.getElementById('videoUrl').value;
-            const frame = document.getElementById('videoFrame');
             
             if (url) {
-                frame.src = url;
+                // Redirect directly to the URL instead of using iframe
+                window.location.href = url;
             }
         }
         
-        function toggleFullscreen() {
-            isFullscreen = !isFullscreen;
-            const body = document.body;
-            const controlPanel = document.getElementById('controlPanel');
-            
-            if (isFullscreen) {
-                body.classList.add('fullscreen-mode');
-                controlPanel.classList.add('hidden');
-            } else {
-                body.classList.remove('fullscreen-mode');
-                controlPanel.classList.remove('hidden');
+        // Auto-redirect to the default watch party on load
+        window.onload = function() {
+            const defaultUrl = document.getElementById('videoUrl').value;
+            if (defaultUrl) {
+                setTimeout(() => {
+                    window.location.href = defaultUrl;
+                }, 500);
             }
-        }
-        
-        // Allow ESC key to exit fullscreen
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && isFullscreen) {
-                toggleFullscreen();
-            }
-        });
+        };
     </script>
 </body>
 </html>
