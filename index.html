@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SL Media Dashboard</title>
+    <title>SL Media Hub</title>
     <style>
         * {
             margin: 0;
@@ -13,586 +13,423 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
-            padding: 20px;
-            min-height: 100vh;
+            overflow: hidden;
+            height: 100vh;
         }
         
-        .container {
-            max-width: 1200px;
+        .home-screen {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header .time {
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 0 20px;
         }
         
-        h1 {
+        .app-tile {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 40px 20px;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
         
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 10px;
+        .app-tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
         
-        .tab {
-            padding: 15px 30px;
+        .app-tile:hover {
+            transform: translateY(-10px) scale(1.05);
             background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 10px 10px 0 0;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            white-space: nowrap;
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
         
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+        .app-tile:hover::before {
+            opacity: 1;
         }
         
-        .tab.active {
-            background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .dashboard {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
+        .app-icon {
+            font-size: 4em;
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
         }
         
-        .panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        }
-        
-        .panel h2 {
-            margin-bottom: 15px;
-            font-size: 1.5em;
-            border-bottom: 2px solid rgba(255,255,255,0.3);
-            padding-bottom: 10px;
-        }
-        
-        .video-section {
-            grid-column: 1 / 2;
-        }
-        
-        .controls-section {
-            grid-column: 2 / 3;
-        }
-        
-        .media-frame {
-            width: 100%;
-            height: 500px;
-            border-radius: 10px;
-            background: #000;
-            border: none;
-        }
-        
-        .video-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-            flex: 1;
-            min-width: 100px;
-        }
-        
-        .btn-primary {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #2196F3;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #0b7dda;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        .input-group label {
-            display: block;
+        .app-name {
+            font-size: 1.3em;
+            font-weight: 600;
             margin-bottom: 5px;
-            font-weight: bold;
+            position: relative;
+            z-index: 1;
         }
         
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            font-size: 14px;
-        }
-        
-        .input-group input::placeholder {
-            color: rgba(255,255,255,0.5);
-        }
-        
-        .preset-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .preset-card {
-            background: rgba(255,255,255,0.15);
-            padding: 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        
-        .preset-card:hover {
-            background: rgba(255,255,255,0.25);
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-        }
-        
-        .preset-card.active {
-            background: rgba(76, 175, 80, 0.3);
-            border: 2px solid #4CAF50;
-        }
-        
-        .preset-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 1.1em;
-        }
-        
-        .preset-description {
+        .app-description {
             font-size: 0.9em;
-            opacity: 0.8;
+            opacity: 0.7;
+            position: relative;
+            z-index: 1;
         }
         
-        .status-bar {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            text-align: center;
+        .app-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            z-index: 1000;
+            flex-direction: column;
         }
         
-        .info-box {
+        .app-screen.active {
+            display: flex;
+        }
+        
+        .app-header {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .back-btn {
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid #4CAF50;
-        }
-        
-        .station-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .station-card {
-            background: rgba(255,255,255,0.15);
-            padding: 15px;
-            border-radius: 10px;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-5px);
+        }
+        
+        .app-title {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .app-content {
+            flex: 1;
+            position: relative;
+        }
+        
+        .app-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            opacity: 0.5;
+        }
+        
+        .footer {
             text-align: center;
+            margin-top: auto;
+            padding-top: 40px;
+            opacity: 0.5;
+            font-size: 0.9em;
         }
         
-        .station-card:hover {
-            background: rgba(255,255,255,0.25);
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
-        .station-card.active {
-            background: rgba(76, 175, 80, 0.3);
-            border: 2px solid #4CAF50;
+        .loading {
+            animation: pulse 2s infinite;
         }
 
         @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
+            .apps-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
             }
             
-            .video-section, .controls-section {
-                grid-column: 1 / 2;
+            .app-tile {
+                padding: 30px 15px;
             }
             
-            .tabs {
-                flex-wrap: wrap;
+            .app-icon {
+                font-size: 3em;
+            }
+            
+            .header h1 {
+                font-size: 2em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎬 SL Media Dashboard</h1>
-        
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('watchparty')">🎉 Watch Party</button>
-            <button class="tab" onclick="switchTab('netflix')">🎬 Netflix</button>
-            <button class="tab" onclick="switchTab('youtube')">📺 YouTube</button>
-            <button class="tab" onclick="switchTab('twitch')">🎮 Twitch</button>
-            <button class="tab" onclick="switchTab('pluto')">📡 Pluto TV</button>
-            <button class="tab" onclick="switchTab('radio')">🎵 Radio</button>
+    <!-- Home Screen -->
+    <div id="homeScreen" class="home-screen">
+        <div class="header">
+            <h1>SL Media Hub</h1>
+            <div class="time" id="currentTime"></div>
         </div>
         
-        <!-- Watch Party Tab -->
-        <div id="watchparty" class="tab-content active">
-            <div class="dashboard">
-                <div class="panel video-section">
-                    <h2>🎉 Watch Party</h2>
-                    <div class="info-box">
-                        Watch together! Share a video URL and enjoy synchronized viewing.
-                    </div>
-                    <iframe id="watchpartyFrame" class="media-frame" src="about:blank"></iframe>
-                </div>
-                
-                <div class="panel controls-section">
-                    <h2>⚙️ Controls</h2>
-                    <div class="input-group">
-                        <label>Video URL:</label>
-                        <input type="text" id="watchpartyUrl" placeholder="Paste video URL here...">
-                        <button class="btn btn-primary" onclick="loadWatchParty()" style="margin-top: 10px; width: 100%;">Load Video</button>
-                    </div>
-                    <div class="status-bar">
-                        <strong>Status:</strong> <span id="watchpartyStatus">Ready</span>
-                    </div>
-                </div>
+        <div class="apps-grid">
+            <div class="app-tile" onclick="openApp('watchparty')">
+                <div class="app-icon">🎉</div>
+                <div class="app-name">Watch Party</div>
+                <div class="app-description">Watch together</div>
+            </div>
+            
+            <div class="app-tile" onclick="openApp('netflix')">
+                <div class="app-icon">🎬</div>
+                <div class="app-name">Netflix</div>
+                <div class="app-description">Movies & Series</div>
+            </div>
+            
+            <div class="app-tile" onclick="openApp('youtube')">
+                <div class="app-icon">📺</div>
+                <div class="app-name">YouTube</div>
+                <div class="app-description">Watch videos</div>
+            </div>
+            
+            <div class="app-tile" onclick="openApp('twitch')">
+                <div class="app-icon">🎮</div>
+                <div class="app-name">Twitch</div>
+                <div class="app-description">Live streams</div>
+            </div>
+            
+            <div class="app-tile" onclick="openApp('pluto')">
+                <div class="app-icon">📡</div>
+                <div class="app-name">Pluto TV</div>
+                <div class="app-description">Free live TV</div>
+            </div>
+            
+            <div class="app-tile" onclick="openApp('radio')">
+                <div class="app-icon">🎵</div>
+                <div class="app-name">Radio</div>
+                <div class="app-description">Music & Talk</div>
             </div>
         </div>
         
-        <!-- Netflix Tab -->
-        <div id="netflix" class="tab-content">
-            <div class="dashboard">
-                <div class="panel video-section">
-                    <h2>🎬 Netflix</h2>
-                    <div class="info-box">
-                        Access Netflix content. You'll need to be logged into Netflix.
-                    </div>
-                    <iframe id="netflixFrame" class="media-frame" src="https://www.netflix.com/browse"></iframe>
-                </div>
-                
-                <div class="panel controls-section">
-                    <h2>Quick Access</h2>
-                    <div class="preset-grid">
-                        <div class="preset-card" onclick="loadNetflix('https://www.netflix.com/browse')">
-                            <div class="preset-name">🏠 Browse</div>
-                            <div class="preset-description">Main page</div>
-                        </div>
-                        <div class="preset-card" onclick="loadNetflix('https://www.netflix.com/browse/genre/83')">
-                            <div class="preset-name">📺 TV Shows</div>
-                            <div class="preset-description">Series</div>
-                        </div>
-                        <div class="preset-card" onclick="loadNetflix('https://www.netflix.com/browse/genre/34399')">
-                            <div class="preset-name">🎭 Movies</div>
-                            <div class="preset-description">Films</div>
-                        </div>
-                    </div>
-                    <div class="input-group" style="margin-top: 15px;">
-                        <label>Custom Netflix URL:</label>
-                        <input type="text" id="netflixUrl" placeholder="Netflix URL...">
-                        <button class="btn btn-secondary" onclick="loadNetflixCustom()" style="margin-top: 10px; width: 100%;">Load</button>
-                    </div>
-                </div>
-            </div>
+        <div class="footer">
+            Click any app to launch
         </div>
-        
-        <!-- YouTube Tab -->
-        <div id="youtube" class="tab-content">
-            <div class="dashboard">
-                <div class="panel video-section">
-                    <h2>📺 YouTube</h2>
-                    <div class="info-box">
-                        Watch YouTube videos. Paste a YouTube URL or video ID.
-                    </div>
-                    <iframe id="youtubeFrame" class="media-frame" src="https://www.youtube.com/embed/" allowfullscreen></iframe>
-                </div>
-                
-                <div class="panel controls-section">
-                    <h2>⚙️ Load Video</h2>
-                    <div class="input-group">
-                        <label>YouTube URL or Video ID:</label>
-                        <input type="text" id="youtubeUrl" placeholder="e.g., dQw4w9WgXcQ">
-                        <button class="btn btn-primary" onclick="loadYoutube()" style="margin-top: 10px; width: 100%;">Load Video</button>
-                    </div>
-                    <div class="preset-grid" style="margin-top: 15px;">
-                        <div class="preset-card" onclick="loadYoutubePreset('jfKfPfyJRdk')">
-                            <div class="preset-name">🎵 Lofi</div>
-                            <div class="preset-description">Chill beats</div>
-                        </div>
-                        <div class="preset-card" onclick="loadYoutubePreset('5qap5aO4i9A')">
-                            <div class="preset-name">🌊 Nature</div>
-                            <div class="preset-description">Relaxing sounds</div>
-                        </div>
-                    </div>
-                    <div class="status-bar">
-                        <strong>Status:</strong> <span id="youtubeStatus">Ready</span>
-                    </div>
-                </div>
-            </div>
+    </div>
+    
+    <!-- Watch Party App -->
+    <div id="watchpartyApp" class="app-screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span> Home
+            </button>
+            <div class="app-title">🎉 Watch Party</div>
+            <div style="width: 100px;"></div>
         </div>
-        
-        <!-- Twitch Tab -->
-        <div id="twitch" class="tab-content">
-            <div class="dashboard">
-                <div class="panel video-section">
-                    <h2>🎮 Twitch</h2>
-                    <div class="info-box">
-                        Watch live streams on Twitch. Enter a channel name.
-                    </div>
-                    <iframe id="twitchFrame" class="media-frame" src="https://www.twitch.tv/" allowfullscreen></iframe>
-                </div>
-                
-                <div class="panel controls-section">
-                    <h2>⚙️ Watch Stream</h2>
-                    <div class="input-group">
-                        <label>Channel Name:</label>
-                        <input type="text" id="twitchChannel" placeholder="e.g., ninja">
-                        <button class="btn btn-primary" onclick="loadTwitch()" style="margin-top: 10px; width: 100%;">Watch Stream</button>
-                    </div>
-                    <div class="preset-grid" style="margin-top: 15px;">
-                        <div class="preset-card" onclick="loadTwitchBrowse()">
-                            <div class="preset-name">🔍 Browse</div>
-                            <div class="preset-description">Explore streams</div>
-                        </div>
-                    </div>
-                    <div class="status-bar">
-                        <strong>Status:</strong> <span id="twitchStatus">Ready</span>
-                    </div>
-                </div>
-            </div>
+        <div class="app-content">
+            <div class="loading" id="watchpartyLoading">Enter a video URL to start</div>
+            <iframe id="watchpartyFrame" class="app-frame" src="about:blank"></iframe>
         </div>
-        
-        <!-- Pluto TV Tab -->
-        <div id="pluto" class="tab-content">
-            <div class="dashboard">
-                <div class="panel video-section">
-                    <h2>📡 Pluto TV</h2>
-                    <div class="info-box">
-                        Free streaming TV with live channels and on-demand content.
-                    </div>
-                    <iframe id="plutoFrame" class="media-frame" src="https://pluto.tv/live-tv"></iframe>
-                </div>
-                
-                <div class="panel controls-section">
-                    <h2>Quick Access</h2>
-                    <div class="preset-grid">
-                        <div class="preset-card" onclick="loadPluto('https://pluto.tv/live-tv')">
-                            <div class="preset-name">📺 Live TV</div>
-                            <div class="preset-description">Channels</div>
-                        </div>
-                        <div class="preset-card" onclick="loadPluto('https://pluto.tv/on-demand')">
-                            <div class="preset-name">🎬 On Demand</div>
-                            <div class="preset-description">Movies & Shows</div>
-                        </div>
-                    </div>
-                    <div class="status-bar">
-                        <strong>Status:</strong> <span id="plutoStatus">Loaded</span>
-                    </div>
-                </div>
-            </div>
+    </div>
+    
+    <!-- Netflix App -->
+    <div id="netflixApp" class="app-screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span> Home
+            </button>
+            <div class="app-title">🎬 Netflix</div>
+            <div style="width: 100px;"></div>
         </div>
-        
-        <!-- Radio Tab -->
-        <div id="radio" class="tab-content">
-            <div class="dashboard">
-                <div class="panel video-section">
-                    <h2>🎵 Radio Stations</h2>
-                    <div class="info-box">
-                        Listen to internet radio streams. Click a station to play.
-                    </div>
-                    <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px;"></audio>
-                    <div id="nowPlaying" style="text-align: center; margin-top: 20px; font-size: 1.2em;">
-                        Select a station to begin
-                    </div>
-                </div>
-                
-                <div class="panel controls-section">
-                    <h2>Stations</h2>
-                    <div class="station-grid">
-                        <div class="station-card" onclick="playStation('http://stream.example.com/jazz', 'Jazz FM', this)">
-                            <div class="preset-name">🎷 Jazz FM</div>
-                            <div class="preset-description">Smooth Jazz</div>
-                        </div>
-                        <div class="station-card" onclick="playStation('http://stream.example.com/rock', 'Rock Radio', this)">
-                            <div class="preset-name">🎸 Rock Radio</div>
-                            <div class="preset-description">Classic Rock</div>
-                        </div>
-                        <div class="station-card" onclick="playStation('http://stream.example.com/electronic', 'Electronic Beats', this)">
-                            <div class="preset-name">🎧 Electronic</div>
-                            <div class="preset-description">EDM & House</div>
-                        </div>
-                        <div class="station-card" onclick="playStation('http://stream.example.com/classical', 'Classical', this)">
-                            <div class="preset-name">🎻 Classical</div>
-                            <div class="preset-description">Orchestra</div>
-                        </div>
-                    </div>
-                    <div class="input-group" style="margin-top: 15px;">
-                        <label>Custom Stream URL:</label>
-                        <input type="text" id="customRadio" placeholder="Enter stream URL...">
-                        <button class="btn btn-secondary" onclick="playCustomStation()" style="margin-top: 10px; width: 100%;">Play</button>
-                    </div>
-                </div>
-            </div>
+        <div class="app-content">
+            <div class="loading">Loading Netflix...</div>
+            <iframe id="netflixFrame" class="app-frame"></iframe>
+        </div>
+    </div>
+    
+    <!-- YouTube App -->
+    <div id="youtubeApp" class="app-screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span> Home
+            </button>
+            <div class="app-title">📺 YouTube</div>
+            <div style="width: 100px;"></div>
+        </div>
+        <div class="app-content">
+            <div class="loading">Loading YouTube...</div>
+            <iframe id="youtubeFrame" class="app-frame"></iframe>
+        </div>
+    </div>
+    
+    <!-- Twitch App -->
+    <div id="twitchApp" class="app-screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span> Home
+            </button>
+            <div class="app-title">🎮 Twitch</div>
+            <div style="width: 100px;"></div>
+        </div>
+        <div class="app-content">
+            <div class="loading">Loading Twitch...</div>
+            <iframe id="twitchFrame" class="app-frame"></iframe>
+        </div>
+    </div>
+    
+    <!-- Pluto TV App -->
+    <div id="plutoApp" class="app-screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span> Home
+            </button>
+            <div class="app-title">📡 Pluto TV</div>
+            <div style="width: 100px;"></div>
+        </div>
+        <div class="app-content">
+            <div class="loading">Loading Pluto TV...</div>
+            <iframe id="plutoFrame" class="app-frame"></iframe>
+        </div>
+    </div>
+    
+    <!-- Radio App -->
+    <div id="radioApp" class="app-screen">
+        <div class="app-header">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span> Home
+            </button>
+            <div class="app-title">🎵 Radio</div>
+            <div style="width: 100px;"></div>
+        </div>
+        <div class="app-content">
+            <div class="loading">Loading Radio...</div>
+            <iframe id="radioFrame" class="app-frame"></iframe>
         </div>
     </div>
 
     <script>
-        // Tab switching
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit'
             });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
             });
+            document.getElementById('currentTime').textContent = `${timeString} • ${dateString}`;
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // App URLs - you'll need separate HTML pages for each
+        const appUrls = {
+            watchparty: 'watchparty.html',
+            netflix: 'https://www.netflix.com/browse',
+            youtube: 'https://www.youtube.com',
+            twitch: 'https://www.twitch.tv',
+            pluto: 'https://pluto.tv/live-tv',
+            radio: 'radio.html'
+        };
+        
+        let currentApp = null;
+        
+        function openApp(appName) {
+            // Hide home screen
+            document.getElementById('homeScreen').style.display = 'none';
             
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-        }
-        
-        // Watch Party
-        function loadWatchParty() {
-            const url = document.getElementById('watchpartyUrl').value;
-            if (url) {
-                document.getElementById('watchpartyFrame').src = url;
-                document.getElementById('watchpartyStatus').textContent = 'Video loaded';
-            } else {
-                document.getElementById('watchpartyStatus').textContent = 'Please enter a URL';
-            }
-        }
-        
-        // Netflix
-        function loadNetflix(url) {
-            document.getElementById('netflixFrame').src = url;
-        }
-        
-        function loadNetflixCustom() {
-            const url = document.getElementById('netflixUrl').value;
-            if (url) {
-                document.getElementById('netflixFrame').src = url;
-            }
-        }
-        
-        // YouTube
-        function loadYoutube() {
-            let input = document.getElementById('youtubeUrl').value;
-            let videoId = input;
+            // Show app screen
+            const appScreen = document.getElementById(`${appName}App`);
+            appScreen.classList.add('active');
             
-            // Extract video ID if full URL is provided
-            if (input.includes('youtube.com') || input.includes('youtu.be')) {
-                const urlParams = new URLSearchParams(new URL(input).search);
-                videoId = urlParams.get('v') || input.split('/').pop();
+            // Load content
+            const frame = document.getElementById(`${appName}Frame`);
+            if (!frame.src || frame.src === 'about:blank') {
+                frame.src = appUrls[appName];
             }
             
-            if (videoId) {
-                document.getElementById('youtubeFrame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-                document.getElementById('youtubeStatus').textContent = 'Video loaded';
-            } else {
-                document.getElementById('youtubeStatus').textContent = 'Please enter a valid YouTube URL';
-            }
+            currentApp = appName;
         }
         
-        function loadYoutubePreset(videoId) {
-            document.getElementById('youtubeFrame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            document.getElementById('youtubeStatus').textContent = 'Playing preset';
-        }
-        
-        // Twitch
-        function loadTwitch() {
-            const channel = document.getElementById('twitchChannel').value;
-            if (channel) {
-                document.getElementById('twitchFrame').src = `https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}`;
-                document.getElementById('twitchStatus').textContent = `Watching ${channel}`;
-            } else {
-                document.getElementById('twitchStatus').textContent = 'Please enter a channel name';
-            }
-        }
-        
-        function loadTwitchBrowse() {
-            document.getElementById('twitchFrame').src = 'https://www.twitch.tv/';
-            document.getElementById('twitchStatus').textContent = 'Browsing Twitch';
-        }
-        
-        // Pluto TV
-        function loadPluto(url) {
-            document.getElementById('plutoFrame').src = url;
-            document.getElementById('plutoStatus').textContent = 'Loaded';
-        }
-        
-        // Radio
-        const audio = document.getElementById('audioPlayer');
-        
-        function playStation(url, name, element) {
-            document.querySelectorAll('.station-card').forEach(card => {
-                card.classList.remove('active');
+        function goHome() {
+            // Hide all app screens
+            document.querySelectorAll('.app-screen').forEach(screen => {
+                screen.classList.remove('active');
             });
             
-            element.classList.add('active');
-            audio.src = url;
-            audio.play().catch(e => {
-                document.getElementById('nowPlaying').textContent = 'Replace with real stream URLs';
-            });
-            document.getElementById('nowPlaying').textContent = `♫ Now Playing: ${name}`;
+            // Show home screen
+            document.getElementById('homeScreen').style.display = 'flex';
+            
+            currentApp = null;
         }
         
-        function playCustomStation() {
-            const url = document.getElementById('customRadio').value;
-            if (url) {
-                audio.src = url;
-                audio.play();
-                document.getElementById('nowPlaying').textContent = '♫ Playing custom stream';
-            }
-        }
+        // Handle iframe load events
+        document.querySelectorAll('.app-frame').forEach(frame => {
+            frame.addEventListener('load', function() {
+                const loading = this.parentElement.querySelector('.loading');
+                if (loading) {
+                    loading.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>
