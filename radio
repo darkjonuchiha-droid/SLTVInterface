@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #434343 0%, #000000 100%);
+            color: white;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .player-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .now-playing {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .stations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .station-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .station-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .station-card.active {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+        
+        .station-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .station-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .station-genre {
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+        
+        .custom-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .custom-section h2 {
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn:hover {
+            background: #0b7dda;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Radio Stations</h1>
+        
+        <div class="player-section">
+            <div class="now-playing" id="nowPlaying">Select a station to begin</div>
+            <audio id="audioPlayer" class="audio-player" controls></audio>
+        </div>
+        
+        <div class="stations-grid">
+            <div class="station-card" onclick="playStation('http://stream.example.com/jazz', 'Jazz FM', '🎷', this)">
+                <div class="station-icon">🎷</div>
+                <div class="station-name">Jazz FM</div>
+                <div class="station-genre">Smooth Jazz & Blues</div>
+            </div>
+            
+            <div class="station-card" onclick="playStation('http://stream.example.com/rock', 'Rock Radio', '🎸', this)">
+                <div class="station-icon">🎸</div>
+                <div class="station-name">Rock Radio</div>
+                <div class="station-genre">Classic Rock Hits</div>
+            </div>
+            
+            <div class="station-card" onclick="playStation('http://stream.example.com/electronic', 'Electronic Beats', '🎧', this)">
+                <div class="station-icon">🎧</div>
+                <div class="station-name">Electronic Beats</div>
+                <div class="station-genre">EDM & House Music</div>
+            </div>
+            
+            <div class="station-card" onclick="playStation('http://stream.example.com/classical', 'Classical Radio', '🎻', this)">
+                <div class="station-icon">🎻</div>
+                <div class="station-name">Classical Radio</div>
+                <div class="station-genre">Orchestra & Symphony</div>
+            </div>
+            
+            <div class="station-card" onclick="playStation('http://stream.example.com/pop', 'Pop Hits', '🎤', this)">
+                <div class="station-icon">🎤</div>
+                <div class="station-name">Pop Hits</div>
+                <div class="station-genre">Top 40 & Charts</div>
+            </div>
+            
+            <div class="station-card" onclick="playStation('http://stream.example.com/chill', 'Chill Lounge', '🌙', this)">
+                <div class="station-icon">🌙</div>
+                <div class="station-name">Chill Lounge</div>
+                <div class="station-genre">Relaxing Vibes</div>
+            </div>
+        </div>
+        
+        <div class="custom-section">
+            <h2>Add Custom Stream</h2>
+            <div class="input-group">
+                <input type="text" id="customUrl" placeholder="Enter stream URL (e.g., http://stream.example.com/radio)">
+                <button class="btn" onclick="playCustom()">Play</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audioPlayer');
+        const nowPlaying = document.getElementById('nowPlaying');
+        
+        function playStation(url, name, icon, element) {
+            // Remove active class from all stations
+            document.querySelectorAll('.station-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Add active class to selected station
+            element.classList.add('active');
+            
+            // Update now playing
+            nowPlaying.innerHTML = `${icon} Now Playing: <strong>${name}</strong>`;
+            
+            // Play the station
+            audio.src = url;
+            audio.play().catch(e => {
+                nowPlaying.textContent = 'Note: Replace these URLs with real radio stream URLs';
+            });
+        }
+        
+        function playCustom() {
+            const url = document.getElementById('customUrl').value;
+            if (url) {
+                // Remove active class from preset stations
+                document.querySelectorAll('.station-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                
+                nowPlaying.innerHTML = '🎵 Now Playing: <strong>Custom Stream</strong>';
+                audio.src = url;
+                audio.play().catch(e => {
+                    nowPlaying.textContent = 'Error: Could not load stream';
+                });
+            }
+        }
+    </script>
+</body>
+</html>
