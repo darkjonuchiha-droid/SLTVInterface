@@ -31,6 +31,45 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px 10px 0 0;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
         .dashboard {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -61,11 +100,12 @@
             grid-column: 2 / 3;
         }
         
-        #videoPlayer {
+        .media-frame {
             width: 100%;
-            height: 400px;
+            height: 500px;
             border-radius: 10px;
             background: #000;
+            border: none;
         }
         
         .video-controls {
@@ -109,17 +149,6 @@
             box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
         }
         
-        .btn-danger {
-            background: #f44336;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #da190b;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
-        }
-        
         .input-group {
             margin-bottom: 15px;
         }
@@ -144,8 +173,58 @@
             color: rgba(255,255,255,0.5);
         }
         
-        .audio-section {
-            grid-column: 1 / 3;
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .preset-card {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .preset-card:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .preset-card.active {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+        }
+        
+        .preset-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .preset-description {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .status-bar {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
         }
         
         .station-grid {
@@ -174,43 +253,18 @@
             background: rgba(76, 175, 80, 0.3);
             border: 2px solid #4CAF50;
         }
-        
-        .station-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .station-genre {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        
-
-        
-        .status-bar {
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            text-align: center;
-        }
-        
-        .volume-control {
-            margin-top: 15px;
-        }
-        
-        .volume-control input[type="range"] {
-            width: 100%;
-            margin-top: 10px;
-        }
 
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
             }
             
-            .video-section, .controls-section, .audio-section {
+            .video-section, .controls-section {
                 grid-column: 1 / 2;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -219,138 +273,326 @@
     <div class="container">
         <h1>🎬 SL Media Dashboard</h1>
         
-        <div class="dashboard">
-            <!-- Video Section -->
-            <div class="panel video-section">
-                <h2>📺 Video Player</h2>
-                <video id="videoPlayer" controls>
-                    <source src="" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                <div class="video-controls">
-                    <button class="btn btn-primary" onclick="playVideo()">▶ Play</button>
-                    <button class="btn btn-secondary" onclick="pauseVideo()">⏸ Pause</button>
-                    <button class="btn btn-danger" onclick="stopVideo()">⏹ Stop</button>
-                </div>
-            </div>
-            
-            <!-- Controls Section -->
-            <div class="panel controls-section">
-                <h2>⚙️ Controls</h2>
-                <div class="input-group">
-                    <label>Video URL:</label>
-                    <input type="text" id="videoUrl" placeholder="Enter video URL...">
-                    <button class="btn btn-primary" onclick="loadVideo()" style="margin-top: 10px; width: 100%;">Load Video</button>
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('watchparty')">🎉 Watch Party</button>
+            <button class="tab" onclick="switchTab('netflix')">🎬 Netflix</button>
+            <button class="tab" onclick="switchTab('youtube')">📺 YouTube</button>
+            <button class="tab" onclick="switchTab('twitch')">🎮 Twitch</button>
+            <button class="tab" onclick="switchTab('pluto')">📡 Pluto TV</button>
+            <button class="tab" onclick="switchTab('radio')">🎵 Radio</button>
+        </div>
+        
+        <!-- Watch Party Tab -->
+        <div id="watchparty" class="tab-content active">
+            <div class="dashboard">
+                <div class="panel video-section">
+                    <h2>🎉 Watch Party</h2>
+                    <div class="info-box">
+                        Watch together! Share a video URL and enjoy synchronized viewing.
+                    </div>
+                    <iframe id="watchpartyFrame" class="media-frame" src="about:blank"></iframe>
                 </div>
                 
-                <div class="volume-control">
-                    <label>🔊 Volume:</label>
-                    <input type="range" id="volumeSlider" min="0" max="100" value="50" onchange="changeVolume()">
+                <div class="panel controls-section">
+                    <h2>⚙️ Controls</h2>
+                    <div class="input-group">
+                        <label>Video URL:</label>
+                        <input type="text" id="watchpartyUrl" placeholder="Paste video URL here...">
+                        <button class="btn btn-primary" onclick="loadWatchParty()" style="margin-top: 10px; width: 100%;">Load Video</button>
+                    </div>
+                    <div class="status-bar">
+                        <strong>Status:</strong> <span id="watchpartyStatus">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Netflix Tab -->
+        <div id="netflix" class="tab-content">
+            <div class="dashboard">
+                <div class="panel video-section">
+                    <h2>🎬 Netflix</h2>
+                    <div class="info-box">
+                        Access Netflix content. You'll need to be logged into Netflix.
+                    </div>
+                    <iframe id="netflixFrame" class="media-frame" src="https://www.netflix.com/browse"></iframe>
                 </div>
                 
-                <div class="status-bar">
-                    <strong>Status:</strong> <span id="status">Ready</span>
-                </div>
-            </div>
-            
-            <!-- Audio/Radio Section -->
-            <div class="panel audio-section">
-                <h2>🎵 Radio Stations</h2>
-                <audio id="audioPlayer"></audio>
-                <div class="station-grid">
-                    <div class="station-card" onclick="playStation('https://stream.example.com/jazz', 'Jazz FM', this)">
-                        <div class="station-name">🎷 Jazz FM</div>
-                        <div class="station-genre">Smooth Jazz</div>
+                <div class="panel controls-section">
+                    <h2>Quick Access</h2>
+                    <div class="preset-grid">
+                        <div class="preset-card" onclick="loadNetflix('https://www.netflix.com/browse')">
+                            <div class="preset-name">🏠 Browse</div>
+                            <div class="preset-description">Main page</div>
+                        </div>
+                        <div class="preset-card" onclick="loadNetflix('https://www.netflix.com/browse/genre/83')">
+                            <div class="preset-name">📺 TV Shows</div>
+                            <div class="preset-description">Series</div>
+                        </div>
+                        <div class="preset-card" onclick="loadNetflix('https://www.netflix.com/browse/genre/34399')">
+                            <div class="preset-name">🎭 Movies</div>
+                            <div class="preset-description">Films</div>
+                        </div>
                     </div>
-                    <div class="station-card" onclick="playStation('https://stream.example.com/rock', 'Rock Radio', this)">
-                        <div class="station-name">🎸 Rock Radio</div>
-                        <div class="station-genre">Classic Rock</div>
-                    </div>
-                    <div class="station-card" onclick="playStation('https://stream.example.com/electronic', 'Electronic Beats', this)">
-                        <div class="station-name">🎧 Electronic</div>
-                        <div class="station-genre">EDM & House</div>
-                    </div>
-                    <div class="station-card" onclick="playStation('https://stream.example.com/classical', 'Classical', this)">
-                        <div class="station-name">🎻 Classical</div>
-                        <div class="station-genre">Orchestra</div>
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>Custom Netflix URL:</label>
+                        <input type="text" id="netflixUrl" placeholder="Netflix URL...">
+                        <button class="btn btn-secondary" onclick="loadNetflixCustom()" style="margin-top: 10px; width: 100%;">Load</button>
                     </div>
                 </div>
             </div>
-            
-
+        </div>
+        
+        <!-- YouTube Tab -->
+        <div id="youtube" class="tab-content">
+            <div class="dashboard">
+                <div class="panel video-section">
+                    <h2>📺 YouTube</h2>
+                    <div class="info-box">
+                        Watch YouTube videos. Paste a YouTube URL or video ID.
+                    </div>
+                    <iframe id="youtubeFrame" class="media-frame" src="https://www.youtube.com/embed/" allowfullscreen></iframe>
+                </div>
+                
+                <div class="panel controls-section">
+                    <h2>⚙️ Load Video</h2>
+                    <div class="input-group">
+                        <label>YouTube URL or Video ID:</label>
+                        <input type="text" id="youtubeUrl" placeholder="e.g., dQw4w9WgXcQ">
+                        <button class="btn btn-primary" onclick="loadYoutube()" style="margin-top: 10px; width: 100%;">Load Video</button>
+                    </div>
+                    <div class="preset-grid" style="margin-top: 15px;">
+                        <div class="preset-card" onclick="loadYoutubePreset('jfKfPfyJRdk')">
+                            <div class="preset-name">🎵 Lofi</div>
+                            <div class="preset-description">Chill beats</div>
+                        </div>
+                        <div class="preset-card" onclick="loadYoutubePreset('5qap5aO4i9A')">
+                            <div class="preset-name">🌊 Nature</div>
+                            <div class="preset-description">Relaxing sounds</div>
+                        </div>
+                    </div>
+                    <div class="status-bar">
+                        <strong>Status:</strong> <span id="youtubeStatus">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Twitch Tab -->
+        <div id="twitch" class="tab-content">
+            <div class="dashboard">
+                <div class="panel video-section">
+                    <h2>🎮 Twitch</h2>
+                    <div class="info-box">
+                        Watch live streams on Twitch. Enter a channel name.
+                    </div>
+                    <iframe id="twitchFrame" class="media-frame" src="https://www.twitch.tv/" allowfullscreen></iframe>
+                </div>
+                
+                <div class="panel controls-section">
+                    <h2>⚙️ Watch Stream</h2>
+                    <div class="input-group">
+                        <label>Channel Name:</label>
+                        <input type="text" id="twitchChannel" placeholder="e.g., ninja">
+                        <button class="btn btn-primary" onclick="loadTwitch()" style="margin-top: 10px; width: 100%;">Watch Stream</button>
+                    </div>
+                    <div class="preset-grid" style="margin-top: 15px;">
+                        <div class="preset-card" onclick="loadTwitchBrowse()">
+                            <div class="preset-name">🔍 Browse</div>
+                            <div class="preset-description">Explore streams</div>
+                        </div>
+                    </div>
+                    <div class="status-bar">
+                        <strong>Status:</strong> <span id="twitchStatus">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pluto TV Tab -->
+        <div id="pluto" class="tab-content">
+            <div class="dashboard">
+                <div class="panel video-section">
+                    <h2>📡 Pluto TV</h2>
+                    <div class="info-box">
+                        Free streaming TV with live channels and on-demand content.
+                    </div>
+                    <iframe id="plutoFrame" class="media-frame" src="https://pluto.tv/live-tv"></iframe>
+                </div>
+                
+                <div class="panel controls-section">
+                    <h2>Quick Access</h2>
+                    <div class="preset-grid">
+                        <div class="preset-card" onclick="loadPluto('https://pluto.tv/live-tv')">
+                            <div class="preset-name">📺 Live TV</div>
+                            <div class="preset-description">Channels</div>
+                        </div>
+                        <div class="preset-card" onclick="loadPluto('https://pluto.tv/on-demand')">
+                            <div class="preset-name">🎬 On Demand</div>
+                            <div class="preset-description">Movies & Shows</div>
+                        </div>
+                    </div>
+                    <div class="status-bar">
+                        <strong>Status:</strong> <span id="plutoStatus">Loaded</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Radio Tab -->
+        <div id="radio" class="tab-content">
+            <div class="dashboard">
+                <div class="panel video-section">
+                    <h2>🎵 Radio Stations</h2>
+                    <div class="info-box">
+                        Listen to internet radio streams. Click a station to play.
+                    </div>
+                    <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px;"></audio>
+                    <div id="nowPlaying" style="text-align: center; margin-top: 20px; font-size: 1.2em;">
+                        Select a station to begin
+                    </div>
+                </div>
+                
+                <div class="panel controls-section">
+                    <h2>Stations</h2>
+                    <div class="station-grid">
+                        <div class="station-card" onclick="playStation('http://stream.example.com/jazz', 'Jazz FM', this)">
+                            <div class="preset-name">🎷 Jazz FM</div>
+                            <div class="preset-description">Smooth Jazz</div>
+                        </div>
+                        <div class="station-card" onclick="playStation('http://stream.example.com/rock', 'Rock Radio', this)">
+                            <div class="preset-name">🎸 Rock Radio</div>
+                            <div class="preset-description">Classic Rock</div>
+                        </div>
+                        <div class="station-card" onclick="playStation('http://stream.example.com/electronic', 'Electronic Beats', this)">
+                            <div class="preset-name">🎧 Electronic</div>
+                            <div class="preset-description">EDM & House</div>
+                        </div>
+                        <div class="station-card" onclick="playStation('http://stream.example.com/classical', 'Classical', this)">
+                            <div class="preset-name">🎻 Classical</div>
+                            <div class="preset-description">Orchestra</div>
+                        </div>
+                    </div>
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>Custom Stream URL:</label>
+                        <input type="text" id="customRadio" placeholder="Enter stream URL...">
+                        <button class="btn btn-secondary" onclick="playCustomStation()" style="margin-top: 10px; width: 100%;">Play</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const video = document.getElementById('videoPlayer');
-        const audio = document.getElementById('audioPlayer');
-        const status = document.getElementById('status');
-        let currentStation = null;
-
-        function updateStatus(msg) {
-            status.textContent = msg;
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
         }
-
-        function loadVideo() {
-            const url = document.getElementById('videoUrl').value;
+        
+        // Watch Party
+        function loadWatchParty() {
+            const url = document.getElementById('watchpartyUrl').value;
             if (url) {
-                video.src = url;
-                video.load();
-                updateStatus('Video loaded');
+                document.getElementById('watchpartyFrame').src = url;
+                document.getElementById('watchpartyStatus').textContent = 'Video loaded';
             } else {
-                updateStatus('Please enter a video URL');
+                document.getElementById('watchpartyStatus').textContent = 'Please enter a URL';
             }
         }
-
-        function playVideo() {
-            if (video.src) {
-                video.play();
-                updateStatus('Playing video');
-            } else {
-                updateStatus('No video loaded');
+        
+        // Netflix
+        function loadNetflix(url) {
+            document.getElementById('netflixFrame').src = url;
+        }
+        
+        function loadNetflixCustom() {
+            const url = document.getElementById('netflixUrl').value;
+            if (url) {
+                document.getElementById('netflixFrame').src = url;
             }
         }
-
-        function pauseVideo() {
-            video.pause();
-            updateStatus('Video paused');
+        
+        // YouTube
+        function loadYoutube() {
+            let input = document.getElementById('youtubeUrl').value;
+            let videoId = input;
+            
+            // Extract video ID if full URL is provided
+            if (input.includes('youtube.com') || input.includes('youtu.be')) {
+                const urlParams = new URLSearchParams(new URL(input).search);
+                videoId = urlParams.get('v') || input.split('/').pop();
+            }
+            
+            if (videoId) {
+                document.getElementById('youtubeFrame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                document.getElementById('youtubeStatus').textContent = 'Video loaded';
+            } else {
+                document.getElementById('youtubeStatus').textContent = 'Please enter a valid YouTube URL';
+            }
         }
-
-        function stopVideo() {
-            video.pause();
-            video.currentTime = 0;
-            updateStatus('Video stopped');
+        
+        function loadYoutubePreset(videoId) {
+            document.getElementById('youtubeFrame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            document.getElementById('youtubeStatus').textContent = 'Playing preset';
         }
-
-        function changeVolume() {
-            const volume = document.getElementById('volumeSlider').value / 100;
-            video.volume = volume;
-            audio.volume = volume;
-            updateStatus(`Volume: ${Math.round(volume * 100)}%`);
+        
+        // Twitch
+        function loadTwitch() {
+            const channel = document.getElementById('twitchChannel').value;
+            if (channel) {
+                document.getElementById('twitchFrame').src = `https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}`;
+                document.getElementById('twitchStatus').textContent = `Watching ${channel}`;
+            } else {
+                document.getElementById('twitchStatus').textContent = 'Please enter a channel name';
+            }
         }
-
+        
+        function loadTwitchBrowse() {
+            document.getElementById('twitchFrame').src = 'https://www.twitch.tv/';
+            document.getElementById('twitchStatus').textContent = 'Browsing Twitch';
+        }
+        
+        // Pluto TV
+        function loadPluto(url) {
+            document.getElementById('plutoFrame').src = url;
+            document.getElementById('plutoStatus').textContent = 'Loaded';
+        }
+        
+        // Radio
+        const audio = document.getElementById('audioPlayer');
+        
         function playStation(url, name, element) {
-            // Remove active class from all stations
             document.querySelectorAll('.station-card').forEach(card => {
                 card.classList.remove('active');
             });
             
-            // Add active class to selected station
             element.classList.add('active');
-            
-            // Play the station
             audio.src = url;
             audio.play().catch(e => {
-                updateStatus('Note: Replace URLs with real stream URLs');
+                document.getElementById('nowPlaying').textContent = 'Replace with real stream URLs';
             });
-            updateStatus(`Playing: ${name}`);
-            currentStation = name;
+            document.getElementById('nowPlaying').textContent = `♫ Now Playing: ${name}`;
         }
-
-
-
-        // Set initial volume
-        changeVolume();
+        
+        function playCustomStation() {
+            const url = document.getElementById('customRadio').value;
+            if (url) {
+                audio.src = url;
+                audio.play();
+                document.getElementById('nowPlaying').textContent = '♫ Playing custom stream';
+            }
+        }
     </script>
 </body>
 </html>
