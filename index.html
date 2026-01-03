@@ -393,20 +393,30 @@
         let currentApp = null;
         
         function openApp(appName) {
-            // Special handling for Watch Party - direct link
+            // Apps that redirect directly (don't work in iframes)
             if (appName === 'watchparty') {
                 window.location.href = 'https://www.watchparty.me/watch/female-back-grind';
                 return;
             }
+            if (appName === 'netflix') {
+                window.location.href = 'https://www.netflix.com/browse';
+                return;
+            }
+            if (appName === 'youtube') {
+                window.location.href = 'https://www.youtube.com';
+                return;
+            }
+            if (appName === 'twitch') {
+                window.location.href = 'https://www.twitch.tv';
+                return;
+            }
             
-            // Hide home screen
+            // Apps that load in iframe (Pluto TV, Radio)
             document.getElementById('homeScreen').style.display = 'none';
             
-            // Show app screen
             const appScreen = document.getElementById(`${appName}App`);
             appScreen.classList.add('active');
             
-            // Load content
             const frame = document.getElementById(`${appName}Frame`);
             if (!frame.src || frame.src === 'about:blank') {
                 frame.src = appUrls[appName];
