@@ -167,30 +167,22 @@
                 <input type="text" id="videoUrl" placeholder="Paste WatchParty.me URL here" value="https://www.watchparty.me/watch/female-back-grind">
                 <button class="btn" onclick="loadVideo()">Load Party</button>
             </div>
-            <div style="text-align: center; margin-top: 15px; opacity: 0.8;">
-                Loading Watch Party...
-            </div>
+        </div>
+        
+        <div class="video-container" id="videoContainer">
+            <iframe id="videoFrame" class="video-frame" src="https://www.watchparty.me/watch/female-back-grind" allowfullscreen></iframe>
         </div>
     </div>
 
     <script>
         function loadVideo() {
             const url = document.getElementById('videoUrl').value;
+            const frame = document.getElementById('videoFrame');
             
             if (url) {
-                window.location.href = url;
+                frame.src = url;
             }
         }
-        
-        // Auto-redirect to the default watch party on load
-        window.onload = function() {
-            const defaultUrl = document.getElementById('videoUrl').value;
-            if (defaultUrl) {
-                setTimeout(() => {
-                    window.location.href = defaultUrl;
-                }, 1000);
-            }
-        };
     </script>
 </body>
 </html>
