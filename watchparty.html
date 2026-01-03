@@ -15,180 +15,53 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
-            height: 100vh;
             display: flex;
-            flex-direction: column;
-            transition: padding 0.3s;
-        }
-        
-        body.fullscreen-mode {
-            padding: 0;
-            background: #000;
-        }
-        
-        body.fullscreen-mode h1 {
-            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
         }
         
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+            max-width: 500px;
+            padding: 40px;
         }
         
         h1 {
-            text-align: center;
+            font-size: 3em;
             margin-bottom: 20px;
-            font-size: 2em;
         }
         
-        .control-panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s;
+        p {
+            font-size: 1.2em;
+            opacity: 0.9;
         }
         
-        .control-panel.hidden {
-            opacity: 0;
-            height: 0;
-            padding: 0;
-            margin: 0;
-            overflow: hidden;
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
         }
         
-        .input-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .input-group input {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 16px;
-        }
-        
-        .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-        
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
-        }
-        
-        .btn-fullscreen {
-            background: #FF9800;
-            margin-left: 10px;
-        }
-        
-        .btn-fullscreen:hover {
-            background: #F57C00;
-            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
-        }
-        
-        .fullscreen-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        body.fullscreen-mode .fullscreen-controls {
-            opacity: 1;
-        }
-        
-        body:not(.fullscreen-mode) .fullscreen-controls {
-            display: none;
-        }
-        
-        .video-container {
-            flex: 1;
-            background: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .video-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        .placeholder {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            opacity: 0.5;
-        }
-        
-        .placeholder-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎉 Watch Party</h1>
-        
-        <div class="control-panel" id="controlPanel">
-            <div class="input-group">
-                <input type="text" id="videoUrl" placeholder="Paste WatchParty.me URL here" value="https://www.watchparty.me/watch/female-back-grind">
-                <button class="btn" onclick="loadVideo()">Load Party</button>
-            </div>
-            <div style="background: rgba(255,152,0,0.2); padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #FF9800;">
-                <strong>📌 Second Life Users:</strong> If fullscreen doesn't work, use this direct URL in your MOAP:<br>
-                <code style="background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 5px; display: inline-block; margin-top: 5px;">https://www.watchparty.me/watch/female-back-grind</code>
-            </div>
-        </div>
-        
-        <div class="video-container" id="videoContainer">
-            <iframe id="videoFrame" class="video-frame" src="https://www.watchparty.me/watch/female-back-grind" 
-                    allowfullscreen 
-                    allow="fullscreen; autoplay; picture-in-picture"></iframe>
-        </div>
+        <h1>🎉</h1>
+        <div class="spinner"></div>
+        <p>Redirecting to Watch Party...</p>
     </div>
 
     <script>
-        function loadVideo() {
-            const url = document.getElementById('videoUrl').value;
-            const frame = document.getElementById('videoFrame');
-            
-            if (url) {
-                frame.src = url;
-            }
-        }
+        // Redirect immediately to Watch Party
+        window.location.href = 'https://www.watchparty.me/watch/female-back-grind';
     </script>
 </body>
 </html>
