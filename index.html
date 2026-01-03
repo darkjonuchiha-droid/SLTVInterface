@@ -393,6 +393,12 @@
         let currentApp = null;
         
         function openApp(appName) {
+            // Special handling for Watch Party - direct link
+            if (appName === 'watchparty') {
+                window.location.href = 'https://www.watchparty.me/watch/female-back-grind';
+                return;
+            }
+            
             // Hide home screen
             document.getElementById('homeScreen').style.display = 'none';
             
