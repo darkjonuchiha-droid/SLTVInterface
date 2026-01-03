@@ -264,12 +264,6 @@
                 <div class="app-name">Radio</div>
                 <div class="app-description">Music & Talk</div>
             </div>
-            
-            <div class="app-tile" onclick="openApp('kosmi')">
-                <div class="app-icon">🎪</div>
-                <div class="app-name">Kosmi</div>
-                <div class="app-description">Watch together</div>
-            </div>
         </div>
         
         <div class="footer">
@@ -366,21 +360,6 @@
             <iframe id="radioFrame" class="app-frame"></iframe>
         </div>
     </div>
-    
-    <!-- Kosmi App -->
-    <div id="kosmiApp" class="app-screen">
-        <div class="app-header">
-            <button class="back-btn" onclick="goHome()">
-                <span>←</span> Home
-            </button>
-            <div class="app-title">🎪 Kosmi</div>
-            <div style="width: 100px;"></div>
-        </div>
-        <div class="app-content">
-            <div class="loading">Loading Kosmi...</div>
-            <iframe id="kosmiFrame" class="app-frame"></iframe>
-        </div>
-    </div>
 
     <script>
         // Update time
@@ -408,8 +387,7 @@
             youtube: 'https://www.youtube.com',
             twitch: 'https://www.twitch.tv',
             pluto: 'https://pluto.tv/live-tv',
-            radio: 'radio.html',
-            kosmi: 'kosmi.html'
+            radio: 'radio.html'
         };
         
         let currentApp = null;
