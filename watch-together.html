@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Together</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5em;
+            margin-right: auto;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #4CAF50;
+        }
+        
+        .btn-success:hover {
+            background: #45a049;
+        }
+        
+        .input-url {
+            flex: 1;
+            min-width: 300px;
+            padding: 10px 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+        
+        .input-url::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .video-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            position: relative;
+        }
+        
+        video {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .placeholder {
+            text-align: center;
+            opacity: 0.5;
+        }
+        
+        .placeholder-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        .room-info {
+            background: rgba(255, 152, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .room-code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px;
+            border-radius: 8px;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab.active {
+            background: rgba(102, 126, 234, 0.5);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .controls {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .time-display {
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎬 Watch Together</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchMode('url')">🔗 URL</button>
+            <button class="tab" onclick="switchMode('file')">📁 File</button>
+            <button class="tab" onclick="switchMode('web')">🌐 Web</button>
+        </div>
+        
+        <div id="urlControls">
+            <input type="text" class="input-url" id="mediaUrl" placeholder="Enter video URL (YouTube, direct .mp4, .mkv, etc.)">
+            <button class="btn btn-success" onclick="loadMedia()">Load</button>
+        </div>
+        
+        <input type="file" id="fileInput" class="file-input" accept="video/*" onchange="loadLocalFile()">
+        <button class="btn" onclick="document.getElementById('fileInput').click()">📁 Choose File</button>
+        
+        <div class="room-info">
+            <span>Room:</span>
+            <span class="room-code" id="roomCode">SOLO</span>
+        </div>
+    </div>
+    
+    <div class="video-container" id="videoContainer">
+        <div class="placeholder" id="placeholder">
+            <div class="placeholder-icon">🎥</div>
+            <div>Load a video URL, upload a file, or browse the web</div>
+        </div>
+        <video id="videoPlayer" controls style="display: none;"></video>
+        <iframe id="webFrame" style="display: none;" allowfullscreen></iframe>
+    </div>
+    
+    <div class="controls" id="videoControls" style="display: none;">
+        <button class="control-btn" onclick="togglePlayPause()">⏯ Play/Pause</button>
+        <button class="control-btn" onclick="skipBackward()">⏪ -10s</button>
+        <button class="control-btn" onclick="skipForward()">⏩ +10s</button>
+        <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+        <div class="volume-control">
+            <span>🔊</span>
+            <input type="range" id="volumeSlider" min="0" max="100" value="50" onchange="changeVolume()">
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'url';
+        const videoPlayer = document.getElementById('videoPlayer');
+        const webFrame = document.getElementById('webFrame');
+        const placeholder = document.getElementById('placeholder');
+        const videoControls = document.getElementById('videoControls');
+        
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Update tab styling
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Hide all media
+            videoPlayer.style.display = 'none';
+            webFrame.style.display = 'none';
+            placeholder.style.display = 'block';
+            videoControls.style.display = 'none';
+        }
+        
+        function loadMedia() {
+            const url = document.getElementById('mediaUrl').value.trim();
+            if (!url) return;
+            
+            placeholder.style.display = 'none';
+            
+            // Check if it's a YouTube URL
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                let videoId = '';
+                if (url.includes('youtu.be/')) {
+                    videoId = url.split('youtu.be/')[1].split('?')[0];
+                } else {
+                    const urlParams = new URLSearchParams(new URL(url).search);
+                    videoId = urlParams.get('v');
+                }
+                
+                webFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+                webFrame.style.display = 'block';
+                videoControls.style.display = 'none';
+                return;
+            }
+            
+            // Check if it's a direct video URL
+            if (url.match(/\.(mp4|webm|ogg|mkv|avi|mov)(\?.*)?$/i) || url.includes('blob:')) {
+                videoPlayer.src = url;
+                videoPlayer.style.display = 'block';
+                videoPlayer.play();
+                videoControls.style.display = 'flex';
+                return;
+            }
+            
+            // Otherwise load as webpage
+            webFrame.src = url;
+            webFrame.style.display = 'block';
+            videoControls.style.display = 'none';
+        }
+        
+        function loadLocalFile() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return;
+            
+            const url = URL.createObjectURL(file);
+            videoPlayer.src = url;
+            videoPlayer.style.display = 'block';
+            placeholder.style.display = 'none';
+            videoPlayer.play();
+            videoControls.style.display = 'flex';
+        }
+        
+        function togglePlayPause() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+            } else {
+                videoPlayer.pause();
+            }
+        }
+        
+        function skipBackward() {
+            videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
+        }
+        
+        function skipForward() {
+            videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
+        }
+        
+        function changeVolume() {
+            const volume = document.getElementById('volumeSlider').value / 100;
+            videoPlayer.volume = volume;
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Update time display
+        videoPlayer.addEventListener('timeupdate', () => {
+            const current = formatTime(videoPlayer.currentTime);
+            const duration = formatTime(videoPlayer.duration || 0);
+            document.getElementById('timeDisplay').textContent = `${current} / ${duration}`;
+        });
+        
+        // Set initial volume
+        changeVolume();
+        
+        // Generate random room code
+        function generateRoomCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+        
+        document.getElementById('roomCode').textContent = generateRoomCode();
+    </script>
+</body>
+</html>
