@@ -60,6 +60,14 @@
             background: #45a049;
         }
         
+        .btn-share {
+            background: #FF9800;
+        }
+        
+        .btn-share:hover {
+            background: #F57C00;
+        }
+        
         .input-url {
             flex: 1;
             min-width: 300px;
@@ -123,6 +131,19 @@
             border-radius: 5px;
             font-family: monospace;
             font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .room-code:hover {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .users-count {
+            background: rgba(76, 175, 80, 0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
         }
         
         .tabs {
@@ -194,43 +215,99 @@
         input[type="range"] {
             width: 100px;
         }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .sync-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
     </style>
 </head>
 <body>
+    <div class="notification" id="notification"></div>
+    <div class="sync-indicator">
+        <div class="sync-dot"></div>
+        <span>Synced</span>
+    </div>
+    
     <div class="header">
         <h1>🎬 Watch Together</h1>
         
         <div class="tabs">
             <button class="tab active" onclick="switchMode('url')">🔗 URL</button>
             <button class="tab" onclick="switchMode('file')">📁 File</button>
-            <button class="tab" onclick="switchMode('web')">🌐 Web</button>
         </div>
         
         <div id="urlControls">
-            <input type="text" class="input-url" id="mediaUrl" placeholder="Enter video URL (YouTube, direct .mp4, .mkv, etc.)">
+            <input type="text" class="input-url" id="mediaUrl" placeholder="Enter video URL (YouTube, direct .mp4, .webm, etc.)">
             <button class="btn btn-success" onclick="loadMedia()">Load</button>
         </div>
         
         <input type="file" id="fileInput" class="file-input" accept="video/*" onchange="loadLocalFile()">
         <button class="btn" onclick="document.getElementById('fileInput').click()">📁 Choose File</button>
         
+        <button class="btn btn-share" onclick="shareRoom()">🔗 Share Room</button>
+        
         <div class="room-info">
             <span>Room:</span>
-            <span class="room-code" id="roomCode">SOLO</span>
+            <span class="room-code" id="roomCode" onclick="copyRoomLink()" title="Click to copy share link">LOADING</span>
+            <span class="users-count" id="usersCount">👥 1</span>
         </div>
     </div>
     
     <div class="video-container" id="videoContainer">
         <div class="placeholder" id="placeholder">
             <div class="placeholder-icon">🎥</div>
-            <div>Load a video URL, upload a file, or browse the web</div>
+            <div>Load a video URL or upload a file</div>
+            <div style="margin-top: 20px; opacity: 0.7;">Share the room link to watch together!</div>
         </div>
         <video id="videoPlayer" controls style="display: none;"></video>
         <iframe id="webFrame" style="display: none;" allowfullscreen></iframe>
     </div>
     
     <div class="controls" id="videoControls" style="display: none;">
-        <button class="control-btn" onclick="togglePlayPause()">⏯ Play/Pause</button>
+        <button class="control-btn" onclick="togglePlayPause()">▶ Play/Pause</button>
         <button class="control-btn" onclick="skipBackward()">⏪ -10s</button>
         <button class="control-btn" onclick="skipForward()">⏩ +10s</button>
         <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
@@ -240,28 +317,262 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // Simple sync using a public API endpoint
         let currentMode = 'url';
         const videoPlayer = document.getElementById('videoPlayer');
         const webFrame = document.getElementById('webFrame');
         const placeholder = document.getElementById('placeholder');
         const videoControls = document.getElementById('videoControls');
+        let roomCode = '';
+        let userId = '';
+        let isUpdatingFromSync = false;
+        let syncCheckInterval;
+        let lastSyncState = null;
         
-        function switchMode(mode) {
-            currentMode = mode;
+        // Generate unique user ID
+        function generateUserId() {
+            return 'user_' + Math.random().toString(36).substring(2, 15);
+        }
+        
+        // Get or create room code from URL
+        function initializeRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomParam = urlParams.get('room');
             
-            // Update tab styling
+            if (roomParam) {
+                roomCode = roomParam;
+            } else {
+                roomCode = generateRoomCode();
+                const newUrl = window.location.pathname + '?room=' + roomCode;
+                window.history.replaceState({}, '', newUrl);
+            }
+            
+            userId = generateUserId();
+            document.getElementById('roomCode').textContent = roomCode;
+            
+            // Start syncing
+            startSync();
+        }
+        
+        function generateRoomCode() {
+            return Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+        
+        // Sync state storage
+        const syncState = {};
+        
+        async function updateRoomState(updates) {
+            if (isUpdatingFromSync) return;
+            
+            const state = {
+                ...lastSyncState,
+                ...updates,
+                timestamp: Date.now(),
+                userId: userId
+            };
+            
+            try {
+                const key = `watch_together_${roomCode}`;
+                await window.storage.set(key, JSON.stringify(state), true);
+                lastSyncState = state;
+            } catch (error) {
+                console.log('Sync update error:', error);
+            }
+        }
+        
+        async function getRoomState() {
+            try {
+                const key = `watch_together_${roomCode}`;
+                const result = await window.storage.get(key, true);
+                if (result && result.value) {
+                    return JSON.parse(result.value);
+                }
+            } catch (error) {
+                console.log('Sync read error:', error);
+            }
+            return null;
+        }
+        
+        async function updateUserCount() {
+            try {
+                const userKey = `watch_together_users_${roomCode}_${userId}`;
+                await window.storage.set(userKey, Date.now().toString(), true);
+                
+                // Get all user keys for this room
+                const allUsers = await window.storage.list(`watch_together_users_${roomCode}_`, true);
+                if (allUsers && allUsers.keys) {
+                    document.getElementById('usersCount').textContent = `👥 ${allUsers.keys.length}`;
+                }
+            } catch (error) {
+                console.log('User count error:', error);
+            }
+        }
+        
+        function startSync() {
+            // Update user presence
+            updateUserCount();
+            setInterval(updateUserCount, 5000);
+            
+            // Poll for state changes
+            syncCheckInterval = setInterval(async () => {
+                const state = await getRoomState();
+                if (!state) return;
+                
+                // Ignore our own updates
+                if (state.userId === userId) return;
+                
+                // Check if state changed
+                if (!lastSyncState || state.timestamp > lastSyncState.timestamp) {
+                    isUpdatingFromSync = true;
+                    applyRoomState(state);
+                    lastSyncState = state;
+                    setTimeout(() => { isUpdatingFromSync = false; }, 500);
+                }
+            }, 1000);
+        }
+        
+        function applyRoomState(state) {
+            if (!state) return;
+            
+            // Load video if URL changed
+            if (state.videoUrl && state.videoUrl !== videoPlayer.src) {
+                if (state.videoType === 'video') {
+                    placeholder.style.display = 'none';
+                    webFrame.style.display = 'none';
+                    videoPlayer.style.display = 'block';
+                    videoPlayer.src = state.videoUrl;
+                    videoControls.style.display = 'flex';
+                }
+            }
+            
+            // Sync playback state
+            if (videoPlayer.src) {
+                const timeDiff = Math.abs(videoPlayer.currentTime - (state.currentTime || 0));
+                
+                // Only seek if difference is more than 2 seconds
+                if (timeDiff > 2) {
+                    videoPlayer.currentTime = state.currentTime || 0;
+                }
+                
+                // Sync play/pause
+                if (state.isPlaying && videoPlayer.paused) {
+                    videoPlayer.play().catch(() => {});
+                } else if (!state.isPlaying && !videoPlayer.paused) {
+                    videoPlayer.pause();
+                }
+            }
+        }
+        
+        // Video event listeners for syncing
+        videoPlayer.addEventListener('play', () => {
+            if (!isUpdatingFromSync) {
+                updateRoomState({
+                    isPlaying: true,
+                    currentTime: videoPlayer.currentTime,
+                    videoUrl: videoPlayer.src,
+                    videoType: 'video'
+                });
+            }
+        });
+        
+        videoPlayer.addEventListener('pause', () => {
+            if (!isUpdatingFromSync) {
+                updateRoomState({
+                    isPlaying: false,
+                    currentTime: videoPlayer.currentTime,
+                    videoUrl: videoPlayer.src,
+                    videoType: 'video'
+                });
+            }
+        });
+        
+        videoPlayer.addEventListener('seeked', () => {
+            if (!isUpdatingFromSync) {
+                updateRoomState({
+                    isPlaying: !videoPlayer.paused,
+                    currentTime: videoPlayer.currentTime,
+                    videoUrl: videoPlayer.src,
+                    videoType: 'video'
+                });
+            }
+        });
+        
+        // Periodic sync of current time while playing
+        setInterval(() => {
+            if (videoPlayer.src && !videoPlayer.paused && !isUpdatingFromSync) {
+                updateRoomState({
+                    isPlaying: true,
+                    currentTime: videoPlayer.currentTime,
+                    videoUrl: videoPlayer.src,
+                    videoType: 'video'
+                });
+            }
+        }, 3000);
+        
+        function getRoomLink() {
+            return window.location.origin + window.location.pathname + '?room=' + roomCode;
+        }
+        
+        window.shareRoom = function() {
+            const link = getRoomLink();
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Watch Together',
+                    text: 'Join my watch party!',
+                    url: link
+                }).catch(() => {
+                    copyToClipboard(link);
+                });
+            } else {
+                copyToClipboard(link);
+            }
+        }
+        
+        window.copyRoomLink = function() {
+            const link = getRoomLink();
+            copyToClipboard(link);
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Room link copied! Share it with friends.');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('Room link copied! Share it with friends.');
+            });
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        window.switchMode = function(mode) {
+            currentMode = mode;
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Hide all media
             videoPlayer.style.display = 'none';
             webFrame.style.display = 'none';
             placeholder.style.display = 'block';
             videoControls.style.display = 'none';
         }
         
-        function loadMedia() {
+        window.loadMedia = function() {
             const url = document.getElementById('mediaUrl').value.trim();
             if (!url) return;
             
@@ -273,32 +584,47 @@
                 if (url.includes('youtu.be/')) {
                     videoId = url.split('youtu.be/')[1].split('?')[0];
                 } else {
-                    const urlParams = new URLSearchParams(new URL(url).search);
-                    videoId = urlParams.get('v');
+                    try {
+                        const urlObj = new URL(url);
+                        videoId = urlObj.searchParams.get('v');
+                    } catch (e) {
+                        showNotification('Invalid YouTube URL');
+                        return;
+                    }
                 }
                 
                 webFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
                 webFrame.style.display = 'block';
                 videoControls.style.display = 'none';
+                
+                updateRoomState({
+                    videoUrl: url,
+                    videoType: 'youtube',
+                    isPlaying: true
+                });
                 return;
             }
             
             // Check if it's a direct video URL
-            if (url.match(/\.(mp4|webm|ogg|mkv|avi|mov)(\?.*)?$/i) || url.includes('blob:')) {
+            if (url.match(/\.(mp4|webm|ogg)(\?.*)?$/i)) {
                 videoPlayer.src = url;
                 videoPlayer.style.display = 'block';
-                videoPlayer.play();
+                videoPlayer.play().catch(() => {});
                 videoControls.style.display = 'flex';
+                
+                updateRoomState({
+                    videoUrl: url,
+                    videoType: 'video',
+                    isPlaying: true,
+                    currentTime: 0
+                });
                 return;
             }
             
-            // Otherwise load as webpage
-            webFrame.src = url;
-            webFrame.style.display = 'block';
-            videoControls.style.display = 'none';
+            showNotification('Please use a direct video URL (.mp4, .webm) or YouTube link');
         }
         
-        function loadLocalFile() {
+        window.loadLocalFile = function() {
             const file = document.getElementById('fileInput').files[0];
             if (!file) return;
             
@@ -306,11 +632,13 @@
             videoPlayer.src = url;
             videoPlayer.style.display = 'block';
             placeholder.style.display = 'none';
-            videoPlayer.play();
+            videoPlayer.play().catch(() => {});
             videoControls.style.display = 'flex';
+            
+            showNotification('Local files cannot be synced with others. Share a URL instead.');
         }
         
-        function togglePlayPause() {
+        window.togglePlayPause = function() {
             if (videoPlayer.paused) {
                 videoPlayer.play();
             } else {
@@ -318,26 +646,26 @@
             }
         }
         
-        function skipBackward() {
+        window.skipBackward = function() {
             videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
         }
         
-        function skipForward() {
+        window.skipForward = function() {
             videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
         }
         
-        function changeVolume() {
+        window.changeVolume = function() {
             const volume = document.getElementById('volumeSlider').value / 100;
             videoPlayer.volume = volume;
         }
         
         function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
         
-        // Update time display
         videoPlayer.addEventListener('timeupdate', () => {
             const current = formatTime(videoPlayer.currentTime);
             const duration = formatTime(videoPlayer.duration || 0);
@@ -345,14 +673,19 @@
         });
         
         // Set initial volume
-        changeVolume();
+        window.changeVolume();
         
-        // Generate random room code
-        function generateRoomCode() {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
+        // Initialize room on load
+        initializeRoom();
         
-        document.getElementById('roomCode').textContent = generateRoomCode();
+        // Check for existing room state on join
+        setTimeout(async () => {
+            const state = await getRoomState();
+            if (state) {
+                applyRoomState(state);
+                showNotification('Joined room! Syncing with others...');
+            }
+        }, 1000);
     </script>
 </body>
 </html>
