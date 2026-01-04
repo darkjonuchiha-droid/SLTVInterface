@@ -229,12 +229,6 @@
         </div>
         
         <div class="apps-grid">
-            <div class="app-tile" onclick="openApp('watchtogether')">
-                <div class="app-icon">🎬</div>
-                <div class="app-name">Watch Together</div>
-                <div class="app-description">Sync video viewing</div>
-            </div>
-            
             <div class="app-tile" onclick="openApp('watchparty')">
                 <div class="app-icon">🎉</div>
                 <div class="app-name">Watch Party</div>
@@ -274,21 +268,6 @@
         
         <div class="footer">
             Click any app to launch
-        </div>
-    </div>
-    
-    <!-- Watch Together App -->
-    <div id="watchtogetherApp" class="app-screen">
-        <div class="app-header">
-            <button class="back-btn" onclick="goHome()">
-                <span>←</span> Home
-            </button>
-            <div class="app-title">🎬 Watch Together</div>
-            <div style="width: 100px;"></div>
-        </div>
-        <div class="app-content">
-            <div class="loading">Loading Watch Together...</div>
-            <iframe id="watchtogetherFrame" class="app-frame"></iframe>
         </div>
     </div>
     
@@ -403,7 +382,6 @@
         
         // App URLs - you'll need separate HTML pages for each
         const appUrls = {
-            watchtogether: 'https://darkjonuchiha-droid.github.io/SLTVInterface/watch-together.html',
             watchparty: 'watchparty.html',
             netflix: 'https://www.netflix.com/browse',
             youtube: 'https://www.youtube.com',
