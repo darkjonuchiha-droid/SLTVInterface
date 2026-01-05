@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SL TV HUD Texture</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #2a2a2a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            text-align: center;
+        }
+        
+        .hud {
+            width: 512px;
+            height: 512px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 3px solid #444;
+            border-radius: 15px;
+            display: flex;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hud::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+        }
+        
+        .column {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 8px;
+        }
+        
+        .left-column {
+            width: 25%;
+            border-right: 2px solid #333;
+        }
+        
+        .middle-column {
+            width: 50%;
+            border-right: 2px solid #333;
+        }
+        
+        .right-column {
+            width: 25%;
+        }
+        
+        .button {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            border: 2px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .button:hover {
+            background: linear-gradient(145deg, #4a4a4a, #3a3a3a);
+            border-color: #666;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .button.power {
+            background: linear-gradient(145deg, #c41e3a, #8b0000);
+            border-color: #ff4444;
+        }
+        
+        .button.power:hover {
+            background: linear-gradient(145deg, #e02040, #a00000);
+        }
+        
+        .button.home {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            border-color: #3edc81;
+        }
+        
+        .button.home:hover {
+            background: linear-gradient(145deg, #3edc81, #37be70);
+        }
+        
+        .button.settings {
+            background: linear-gradient(145deg, #f39c12, #d68910);
+            border-color: #ffa522;
+        }
+        
+        .button.settings:hover {
+            background: linear-gradient(145deg, #ffac22, #e68910);
+        }
+        
+        .app-button {
+            min-height: 72px;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            border-color: #4aa8eb;
+        }
+        
+        .app-button:hover {
+            background: linear-gradient(145deg, #4aa8eb, #3988c9);
+        }
+        
+        .app-button.watchparty {
+            background: linear-gradient(145deg, #9b59b6, #8e44ad);
+            border-color: #ab69c6;
+        }
+        
+        .app-button.netflix {
+            background: linear-gradient(145deg, #e50914, #b20710);
+            border-color: #f51920;
+        }
+        
+        .app-button.youtube {
+            background: linear-gradient(145deg, #ff0000, #cc0000);
+            border-color: #ff2020;
+        }
+        
+        .app-button.twitch {
+            background: linear-gradient(145deg, #9146ff, #772ce8);
+            border-color: #a156ff;
+        }
+        
+        .app-button.plex {
+            background: linear-gradient(145deg, #e5a00d, #cc8c0a);
+            border-color: #f5b01d;
+        }
+        
+        .app-button.pluto {
+            background: linear-gradient(145deg, #1e90ff, #1873cc);
+            border-color: #2ea0ff;
+        }
+        
+        .app-button.xxx {
+            background: linear-gradient(145deg, #ff1493, #cc1076);
+            border-color: #ff24a3;
+        }
+        
+        .icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        
+        .label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .app-label {
+            font-size: 13px;
+        }
+        
+        .control-button {
+            min-height: 60px;
+        }
+        
+        h2 {
+            color: white;
+            margin-top: 30px;
+            font-size: 18px;
+        }
+        
+        .download-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(145deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .download-btn:hover {
+            background: linear-gradient(145deg, #4aa8eb, #3988c9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hud" id="hud">
+            <!-- Left Column -->
+            <div class="column left-column">
+                <div class="button power">
+                    <div class="icon">⏻</div>
+                    <div class="label">Power</div>
+                </div>
+                <div class="button home">
+                    <div class="icon">⌂</div>
+                    <div class="label">Home</div>
+                </div>
+                <div class="button settings">
+                    <div class="icon">⚙</div>
+                    <div class="label">Settings</div>
+                </div>
+            </div>
+            
+            <!-- Middle Column -->
+            <div class="column middle-column">
+                <div class="button app-button watchparty">
+                    <div class="icon">👥</div>
+                    <div class="label app-label">WatchParty</div>
+                </div>
+                <div class="button app-button netflix">
+                    <div class="icon">N</div>
+                    <div class="label app-label">Netflix</div>
+                </div>
+                <div class="button app-button youtube">
+                    <div class="icon">▶</div>
+                    <div class="label app-label">YouTube</div>
+                </div>
+                <div class="button app-button twitch">
+                    <div class="icon">🎮</div>
+                    <div class="label app-label">Twitch</div>
+                </div>
+                <div class="button app-button plex">
+                    <div class="icon">▸</div>
+                    <div class="label app-label">Plex</div>
+                </div>
+                <div class="button app-button pluto">
+                    <div class="icon">📺</div>
+                    <div class="label app-label">Pluto TV</div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="column right-column">
+                <div class="button control-button">
+                    <div class="icon">⬚</div>
+                    <div class="label">Aspect</div>
+                </div>
+                <div class="button control-button">
+                    <div class="icon">🔊</div>
+                    <div class="label">Volume</div>
+                </div>
+                <div class="button control-button">
+                    <div class="icon">☀</div>
+                    <div class="label">Brightness</div>
+                </div>
+            </div>
+        </div>
+        
+        <h2>Right-click image above → Save As → hud_texture.png</h2>
+        <button class="download-btn" onclick="downloadTexture()">Download 512x512 Texture</button>
+    </div>
+    
+    <script>
+        async function downloadTexture() {
+            const hud = document.getElementById('hud');
+            
+            // Create a canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw background
+            const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+            gradient.addColorStop(0, '#1a1a1a');
+            gradient.addColorStop(1, '#2d2d2d');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Draw borders
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(1.5, 1.5, 509, 509);
+            
+            // Column dividers
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(128, 0);
+            ctx.lineTo(128, 512);
+            ctx.moveTo(384, 0);
+            ctx.lineTo(384, 512);
+            ctx.stroke();
+            
+            // Helper function to draw rounded rect
+            function roundRect(x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            }
+            
+            // Left column buttons
+            const leftButtons = [
+                {y: 10, h: 155, color: '#c41e3a', text: '⏻', label: 'POWER'},
+                {y: 175, h: 155, color: '#2ecc71', text: '⌂', label: 'HOME'},
+                {y: 340, h: 155, color: '#f39c12', text: '⚙', label: 'SETTINGS'}
+            ];
+            
+            leftButtons.forEach(btn => {
+                roundRect(15, btn.y, 100, btn.h, 8);
+                ctx.fillStyle = btn.color;
+                ctx.fill();
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 32px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(btn.text, 65, btn.y + btn.h/2);
+                ctx.font = 'bold 11px Arial';
+                ctx.fillText(btn.label, 65, btn.y + btn.h/2 + 30);
+            });
+            
+            // Middle column (apps)
+            const apps = [
+                {name: 'WATCHPARTY', color: '#9b59b6', icon: '👥'},
+                {name: 'NETFLIX', color: '#e50914', icon: 'N'},
+                {name: 'YOUTUBE', color: '#ff0000', icon: '▶'},
+                {name: 'TWITCH', color: '#9146ff', icon: '🎮'},
+                {name: 'PLEX', color: '#e5a00d', icon: '▸'},
+                {name: 'PLUTO TV', color: '#1e90ff', icon: '📺'}
+            ];
+            
+            apps.forEach((app, i) => {
+                const y = 10 + (i * 82);
+                roundRect(138, y, 236, 72, 8);
+                ctx.fillStyle = app.color;
+                ctx.fill();
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = 'white';
+                ctx.font = '28px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(app.icon, 256, y + 32);
+                ctx.font = 'bold 13px Arial';
+                ctx.fillText(app.name, 256, y + 57);
+            });
+            
+            // Right column
+            const rightButtons = [
+                {y: 10, text: '⬚', label: 'ASPECT'},
+                {y: 175, text: '🔊', label: 'VOLUME'},
+                {y: 340, text: '☀', label: 'BRIGHT'}
+            ];
+            
+            rightButtons.forEach(btn => {
+                roundRect(394, btn.y, 103, 155, 8);
+                ctx.fillStyle = '#3a3a3a';
+                ctx.fill();
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = 'white';
+                ctx.font = '32px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(btn.text, 445, btn.y + 80);
+                ctx.font = 'bold 11px Arial';
+                ctx.fillText(btn.label, 445, btn.y + 110);
+            });
+            
+            // Convert canvas to blob and download
+            canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.download = 'tv_hud_texture.png';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            });
+        }
+
+    </script>
+</body>
+</html>
