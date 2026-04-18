@@ -264,6 +264,12 @@
                 <div class="app-name">Radio</div>
                 <div class="app-description">Music & Talk</div>
             </div>
+
+            <div class="app-tile" onclick="openApp('pornhub')">
+                <div class="app-icon">🔞</div>
+                <div class="app-name">Porn</div>
+                <div class="app-description">Adult content</div>
+            </div>
         </div>
         
         <div class="footer">
@@ -408,6 +414,10 @@
             }
             if (appName === 'twitch') {
                 window.location.href = 'https://www.twitch.tv';
+                return;
+            }
+            if (appName === 'pornhub') {
+                window.location.href = 'https://www.pornhub.com';
                 return;
             }
             
