@@ -31,6 +31,7 @@ Headline features:
 | 4 | Guest HUD attach | **Experience-based silent auto-attach** on TV click, with hand-to-Wear fallback where the Experience isn't enabled |
 | 5 | Adult content | **Kept, owner-gated** (off by default; separate guest toggle) |
 | 6 | Display modes | **Content-fit** (Fit/Fill/Stretch/Cinema) default + **optional physical aspect** (16:9/4:3/21:9) |
+| 7 | Synced fullscreen | One-tap **Fullscreen relayed through the TV** → edge-to-edge video for **everyone at once** (not a per-viewer native click) |
 
 ## 3. Architecture
 
@@ -107,13 +108,20 @@ Three in-world objects (LSL) + static web pages (GitHub Pages). No server.
 - **`remote.html`** + `assets/remote.js`/`remote.css` — the HUD UI. Tabs:
   - **Radio** — Radio-Browser search/browse (name/genre/country/language).
   - **Live TV** — IPTV-org guide grid, categorized, with a stream liveness check.
-  - **Watch Party** — Kosmi create/join, CyTube channel, paste-any-URL.
+  - **Watch Party** — Kosmi create/join, CyTube channel, paste-any-URL. Embeddable
+    rooms load through `players/watch.html` (enables synced fullscreen); rooms that
+    refuse iframing navigate the prim directly (fullscreen then limited to their URL params).
   - **Favorites** — saved items of any type (source of truth = TV LinksetData).
   - **Settings** (owner only) — display mode, guest permissions, adult toggle, update badge, re-pair.
   - Reads `relay`/`role`/`tok` from query string; writes via image-GET, reads via JSONP.
 - **`players/radio.html`** — audio player + now-playing art/visualizer.
 - **`players/livetv.html`** — hls.js HLS player.
+- **`players/watch.html`** — wrapper that iframes embeddable watch-party rooms so display
+  state (incl. **synced fullscreen**) is controllable across all viewers.
 - **`players/idle.html`** — standby screen (clock + branding).
+
+All player pages accept a `&fs=1` (fullscreen) state from the relayed display command, so
+the toggle is part of the shared media URL and applies to everyone at once.
 - **`assets/`** — `radio-browser.js`, `iptv.js`, `hls.min.js`, shared CSS.
 - **`data/version.json`** — `{ version, notes, url }` for update notifications.
 
@@ -138,6 +146,12 @@ pairing/setup state. Owner option: on power-on, auto-resume last channel or show
   CSS class on the player pages toggled by command.
 - **Physical aspect** (optional, owner): reshape screen prim to 16:9 / 4:3 / 21:9.
 - **Power/Standby:** clean idle screen instead of a frozen frame.
+- **Fullscreen (synced):** one tap on the remote relays a `fs=1` display state through the TV
+  so the video goes edge-to-edge (chrome hidden, video fills 100%) on **every viewer's screen
+  simultaneously**. It is a relayed command, *not* the player's native fullscreen button (that
+  would only affect the clicker's own render). Perfect for our hosted players and chromeless
+  embeds; best-effort for third-party apps we can't reach into across origins (e.g. Kosmi's
+  internal sidebar). Owner-driven by default; can be added to the guest-permission toggles.
 
 ## 8. Permissions (TV-side enforced)
 
@@ -197,3 +211,6 @@ SLTVInterface/                 ← GitHub Pages root (unchanged domain)
 - **Cap URL volatility**: mitigated by auto re-pair.
 - **Media-on-prim audio** is per-viewer (not synced) for radio/live TV — acceptable for live
   streams; on-demand sync is delegated to Kosmi/CyTube.
+- **Native in-player fullscreen does not sync** across viewers (each renders independently) —
+  mitigated by making fullscreen a relayed display command via our player wrapper; third-party
+  app internal chrome is best-effort only.
