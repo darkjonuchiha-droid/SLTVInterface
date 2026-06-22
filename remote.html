@@ -9,7 +9,7 @@
 <body>
   <nav class="tabs">
     <button class="tab active" data-tab="radio">📻 Radio</button>
-    <button class="tab" data-tab="tv" disabled>📺 TV</button>
+    <button class="tab" data-tab="tv">📺 TV</button>
     <button class="tab" data-tab="party" disabled>🎉 Party</button>
     <button class="tab" data-tab="favorites">⭐ Favs</button>
     <button class="tab" data-tab="settings" disabled>⚙️ Settings</button>
@@ -21,6 +21,11 @@
       <button id="radioSearchBtn">Search</button>
     </div>
     <div id="radioResults"><div class="hint">Search the Radio-Browser directory to begin.</div></div>
+  </section>
+
+  <section id="panel-tv" class="panel">
+    <div id="tvCategories" class="chips"></div>
+    <div id="tvResults"><div class="hint">Pick a category to load channels.</div></div>
   </section>
 
   <section id="panel-favorites" class="panel">

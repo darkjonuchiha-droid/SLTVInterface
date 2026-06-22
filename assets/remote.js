@@ -2,6 +2,7 @@ import { parseRelayConfig, sendCommand } from "./relay.js";
 import { CMD } from "./protocol.js";
 import { RADIO_BROWSER_BASE, searchStations } from "./radio-browser.js";
 import { favKey, addFavorite, removeFavorite, serialize, deserialize } from "./favorites.js";
+import { IPTV_BASE, CATEGORIES, fetchCategory } from "./iptv.js";
 
 const cfg = parseRelayConfig(window.location.search);
 
@@ -127,6 +128,7 @@ function renderFavorites() {
     row.querySelector(".name").textContent = f.name;
     row.querySelector(".meta").addEventListener("click", () => {
       if (f.type === "radio") playStation({ url: f.url });
+      else if (f.type === "tv") playChannel({ url: f.url, name: f.name, logo: f.icon, tvgId: f.id });
     });
     row.querySelector(".fav").addEventListener("click", () => toggleFavorite(f));
     root.appendChild(row);
@@ -155,8 +157,76 @@ function initRadio() {
   renderFavorites();
 }
 
+export function livePlayerUrl(streamUrl, { fs = false } = {}) {
+  const qs = `src=${encodeURIComponent(streamUrl)}${fs ? "&fs=1" : ""}`;
+  return `players/livetv.html?${qs}`;
+}
+
+export function channelToFavorite(ch) {
+  return { type: "tv", id: ch.tvgId || ch.url, name: ch.name, url: ch.url, icon: ch.logo || "" };
+}
+
+function playChannel(ch) {
+  const absolute = new URL(livePlayerUrl(ch.url, { fs: false }), window.location.href).href;
+  sendCommand(cfg, CMD.LOAD, { url: absolute }, { onDev: (e) => relayDev(e.cmd, e.params) });
+}
+
+export function renderChannels(channels, isFav) {
+  const root = document.getElementById("tvResults");
+  root.innerHTML = "";
+  if (!channels.length) {
+    root.innerHTML = `<div class="empty">No channels found.</div>`;
+    return;
+  }
+  const grid = document.createElement("div");
+  grid.className = "grid";
+  for (const ch of channels) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.innerHTML = `
+      <img src="${ch.logo || ""}" alt="" onerror="this.style.visibility='hidden'" />
+      <div class="tile-name"></div>
+      <button class="fav">${isFav(ch) ? "★" : "☆"}</button>`;
+    tile.querySelector(".tile-name").textContent = ch.name;
+    tile.querySelector("img").addEventListener("click", () => playChannel(ch));
+    tile.querySelector(".tile-name").addEventListener("click", () => playChannel(ch));
+    tile.querySelector(".fav").addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      toggleFavorite(channelToFavorite(ch));
+      ev.target.textContent = favorites.some((f) => favKey(f) === favKey(channelToFavorite(ch))) ? "★" : "☆";
+    });
+    grid.appendChild(tile);
+  }
+  root.appendChild(grid);
+}
+
+async function loadCategory(key, chipEl) {
+  document.querySelectorAll("#tvCategories .chip").forEach((c) => c.classList.toggle("active", c === chipEl));
+  const root = document.getElementById("tvResults");
+  root.innerHTML = `<div class="hint">Loading channels…</div>`;
+  try {
+    const channels = await fetchCategory(IPTV_BASE, key, { limit: 120 });
+    renderChannels(channels, (ch) => favorites.some((f) => favKey(f) === `tv:${ch.tvgId || ch.url}`));
+  } catch (e) {
+    root.innerHTML = `<div class="empty">Failed to load: ${e.message}</div>`;
+  }
+}
+
+function initTv() {
+  const bar = document.getElementById("tvCategories");
+  if (!bar) return;
+  for (const cat of CATEGORIES) {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.textContent = cat.label;
+    chip.addEventListener("click", () => loadCategory(cat.key, chip));
+    bar.appendChild(chip);
+  }
+}
+
 initTabs();
 initDebug();
 initRadio();
+initTv();
 
 export { cfg, showTab };
