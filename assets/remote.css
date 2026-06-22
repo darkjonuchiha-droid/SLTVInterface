@@ -68,3 +68,14 @@ body {
   background: var(--accent); color: #1a1200; font-weight: 700; cursor: pointer;
 }
 .party-row .fav { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; }
+.set-group { margin-bottom: 16px; }
+.set-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.ctl {
+  flex: 1; min-width: 64px; padding: 10px 8px; border-radius: 8px; cursor: pointer;
+  border: 1px solid #2a2f48; background: #0b0d18; color: var(--text); font-size: 13px;
+}
+.ctl:hover { border-color: var(--accent); }
+.ctl:active { background: var(--accent); color: #1a1200; }
+#volSlider { width: 100%; accent-color: var(--accent); }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; }

@@ -12,7 +12,7 @@
     <button class="tab" data-tab="tv">📺 TV</button>
     <button class="tab" data-tab="party">🎉 Party</button>
     <button class="tab" data-tab="favorites">⭐ Favs</button>
-    <button class="tab" data-tab="settings" disabled>⚙️ Settings</button>
+    <button class="tab" data-tab="settings">⚙️ Settings</button>
   </nav>
 
   <section id="panel-radio" class="panel active">
@@ -40,6 +40,48 @@
       <button id="roomFav" class="fav" title="Favorite">☆</button>
     </div>
     <div class="hint">Synced by the service — everyone sees the same playback. Fullscreen syncs from the remote.</div>
+  </section>
+
+  <section id="panel-settings" class="panel">
+    <div class="set-group">
+      <div class="set-title">Power</div>
+      <div class="btn-row">
+        <button class="ctl" data-power="ON">⏻ On</button>
+        <button class="ctl" data-power="OFF">⏾ Standby</button>
+      </div>
+    </div>
+    <div class="set-group">
+      <div class="set-title">Display</div>
+      <div class="btn-row">
+        <button class="ctl" data-disp="FIT">Fit</button>
+        <button class="ctl" data-disp="FILL">Fill</button>
+        <button class="ctl" data-disp="STRETCH">Stretch</button>
+        <button class="ctl" data-disp="CINEMA">Cinema</button>
+      </div>
+      <div class="btn-row">
+        <button class="ctl" data-disp="FS_ON">⛶ Fullscreen (all)</button>
+        <button class="ctl" data-disp="FS_OFF">Windowed</button>
+      </div>
+      <div class="set-title">Aspect</div>
+      <div class="btn-row">
+        <button class="ctl" data-disp="ASPECT_169">16:9</button>
+        <button class="ctl" data-disp="ASPECT_43">4:3</button>
+        <button class="ctl" data-disp="ASPECT_219">21:9</button>
+      </div>
+    </div>
+    <div class="set-group">
+      <div class="set-title">Volume</div>
+      <input id="volSlider" type="range" min="0" max="100" value="80" />
+    </div>
+    <div class="set-group">
+      <div class="set-title">Content</div>
+      <label class="toggle"><input type="checkbox" id="adultToggle" /> Enable adult category</label>
+    </div>
+    <div class="set-group">
+      <div class="set-title">System</div>
+      <div id="updateStatus" class="hint"></div>
+      <div class="btn-row"><button class="ctl" id="checkUpdateBtn">Check for updates</button></div>
+    </div>
   </section>
 
   <section id="panel-favorites" class="panel">

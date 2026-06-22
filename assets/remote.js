@@ -4,6 +4,7 @@ import { RADIO_BROWSER_BASE, searchStations } from "./radio-browser.js";
 import { favKey, addFavorite, removeFavorite, serialize, deserialize } from "./favorites.js";
 import { IPTV_BASE, CATEGORIES, fetchCategory } from "./iptv.js";
 import { cytubeUrl, watchWrapperUrl, partyToFavorite } from "./party.js";
+import { APP_VERSION, parsePerms, canUse, checkForUpdate } from "./settings.js";
 
 const cfg = parseRelayConfig(window.location.search);
 
@@ -248,10 +249,51 @@ function initParty() {
   if (roomFav) roomFav.addEventListener("click", () => { if (roomIn.value.trim()) toggleFavorite(partyToFavorite({ kind: "custom", value: roomIn.value.trim() })); });
 }
 
+export function displayCommandFor(mode) {
+  return { mode };
+}
+
+export function applyRoleVisibility(role, perms) {
+  const capForTab = { radio: "radio", tv: "tv", party: "party", settings: "settings", favorites: null };
+  document.querySelectorAll(".tab").forEach((t) => {
+    const cap = capForTab[t.dataset.tab];
+    const allowed = cap === null ? true : canUse(role, perms, cap);
+    t.style.display = allowed ? "" : "none";
+  });
+}
+
+function initSettings() {
+  document.querySelectorAll("[data-power]").forEach((b) =>
+    b.addEventListener("click", () => sendCommand(cfg, CMD.POWER, { state: b.dataset.power }, { onDev: (e) => relayDev(e.cmd, e.params) })));
+  document.querySelectorAll("[data-disp]").forEach((b) =>
+    b.addEventListener("click", () => sendCommand(cfg, CMD.DISPLAY, displayCommandFor(b.dataset.disp), { onDev: (e) => relayDev(e.cmd, e.params) })));
+  const vol = document.getElementById("volSlider");
+  if (vol) vol.addEventListener("change", () => sendCommand(cfg, CMD.VOL, { level: vol.value }, { onDev: (e) => relayDev(e.cmd, e.params) }));
+  const adult = document.getElementById("adultToggle");
+  if (adult) adult.addEventListener("change", () => sendCommand(cfg, CMD.SET, { key: "adult", value: adult.checked ? "on" : "off" }, { onDev: (e) => relayDev(e.cmd, e.params) }));
+  const status = document.getElementById("updateStatus");
+  if (status) status.textContent = `Version ${APP_VERSION}`;
+  const btn = document.getElementById("checkUpdateBtn");
+  if (btn && status) btn.addEventListener("click", async () => {
+    status.textContent = "Checking…";
+    try {
+      const r = await checkForUpdate();
+      status.textContent = r.available ? `Update available: v${r.version} — ${r.notes}` : `Up to date (v${APP_VERSION}).`;
+    } catch (e) {
+      status.textContent = `Update check failed: ${e.message}`;
+    }
+  });
+}
+
 initTabs();
 initDebug();
 initRadio();
 initTv();
 initParty();
+initSettings();
+{
+  const { perms } = parsePerms(window.location.search);
+  applyRoleVisibility(cfg.isDev ? "owner" : cfg.role, perms);
+}
 
 export { cfg, showTab };
