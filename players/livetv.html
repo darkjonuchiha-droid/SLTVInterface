@@ -26,6 +26,11 @@
     if (p.get("fs") === "1") document.body.classList.add("fs");
     const v = document.getElementById("v");
     const msg = document.getElementById("msg");
+    // Relayed display mode (FIT/FILL/STRETCH/CINEMA); fullscreen forces cover.
+    const fitMap = { FIT: "contain", FILL: "cover", STRETCH: "fill", CINEMA: "cover" };
+    const mode = p.get("mode") || "";
+    if (p.get("fs") === "1") v.style.objectFit = "cover";
+    else if (fitMap[mode]) v.style.objectFit = fitMap[mode];
     function fail(t) { msg.textContent = t; msg.style.display = "block"; }
     function ok() { msg.style.display = "none"; }
     v.addEventListener("playing", ok);
