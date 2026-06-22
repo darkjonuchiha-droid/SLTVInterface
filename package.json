@@ -1,0 +1,16 @@
+{
+  "name": "sltv-interface",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "serve": "http-server -p 8080 -c-1 ."
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "jsdom": "^24.0.0",
+    "vitest": "^1.6.0"
+  }
+}
