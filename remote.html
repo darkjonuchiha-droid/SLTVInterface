@@ -10,7 +10,7 @@
   <nav class="tabs">
     <button class="tab active" data-tab="radio">📻 Radio</button>
     <button class="tab" data-tab="tv">📺 TV</button>
-    <button class="tab" data-tab="party" disabled>🎉 Party</button>
+    <button class="tab" data-tab="party">🎉 Party</button>
     <button class="tab" data-tab="favorites">⭐ Favs</button>
     <button class="tab" data-tab="settings" disabled>⚙️ Settings</button>
   </nav>
@@ -26,6 +26,20 @@
   <section id="panel-tv" class="panel">
     <div id="tvCategories" class="chips"></div>
     <div id="tvResults"><div class="hint">Pick a category to load channels.</div></div>
+  </section>
+
+  <section id="panel-party" class="panel">
+    <div class="party-row">
+      <input id="cytubeInput" type="text" placeholder="CyTube channel name" />
+      <button id="cytubeGo">Go</button>
+      <button id="cytubeFav" class="fav" title="Favorite">☆</button>
+    </div>
+    <div class="party-row">
+      <input id="roomInput" type="text" placeholder="Paste room/video URL (Kosmi, YouTube…)" />
+      <button id="roomGo">Go</button>
+      <button id="roomFav" class="fav" title="Favorite">☆</button>
+    </div>
+    <div class="hint">Synced by the service — everyone sees the same playback. Fullscreen syncs from the remote.</div>
   </section>
 
   <section id="panel-favorites" class="panel">

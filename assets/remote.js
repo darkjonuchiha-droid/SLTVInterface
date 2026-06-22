@@ -3,6 +3,7 @@ import { CMD } from "./protocol.js";
 import { RADIO_BROWSER_BASE, searchStations } from "./radio-browser.js";
 import { favKey, addFavorite, removeFavorite, serialize, deserialize } from "./favorites.js";
 import { IPTV_BASE, CATEGORIES, fetchCategory } from "./iptv.js";
+import { cytubeUrl, watchWrapperUrl, partyToFavorite } from "./party.js";
 
 const cfg = parseRelayConfig(window.location.search);
 
@@ -129,6 +130,7 @@ function renderFavorites() {
     row.querySelector(".meta").addEventListener("click", () => {
       if (f.type === "radio") playStation({ url: f.url });
       else if (f.type === "tv") playChannel({ url: f.url, name: f.name, logo: f.icon, tvgId: f.id });
+      else if (f.type === "party") playParty(f.url);
     });
     row.querySelector(".fav").addEventListener("click", () => toggleFavorite(f));
     root.appendChild(row);
@@ -224,9 +226,32 @@ function initTv() {
   }
 }
 
+export function partyPlayUrl(roomUrl) {
+  return new URL(watchWrapperUrl(roomUrl), window.location.href).href;
+}
+
+function playParty(roomUrl) {
+  if (!roomUrl) return;
+  sendCommand(cfg, CMD.LOAD, { url: partyPlayUrl(roomUrl) }, { onDev: (e) => relayDev(e.cmd, e.params) });
+}
+
+function initParty() {
+  const cyIn = document.getElementById("cytubeInput");
+  const cyGo = document.getElementById("cytubeGo");
+  const cyFav = document.getElementById("cytubeFav");
+  const roomIn = document.getElementById("roomInput");
+  const roomGo = document.getElementById("roomGo");
+  const roomFav = document.getElementById("roomFav");
+  if (cyGo) cyGo.addEventListener("click", () => { if (cyIn.value.trim()) playParty(cytubeUrl(cyIn.value.trim())); });
+  if (cyFav) cyFav.addEventListener("click", () => { if (cyIn.value.trim()) toggleFavorite(partyToFavorite({ kind: "cytube", value: cyIn.value.trim() })); });
+  if (roomGo) roomGo.addEventListener("click", () => { if (roomIn.value.trim()) playParty(roomIn.value.trim()); });
+  if (roomFav) roomFav.addEventListener("click", () => { if (roomIn.value.trim()) toggleFavorite(partyToFavorite({ kind: "custom", value: roomIn.value.trim() })); });
+}
+
 initTabs();
 initDebug();
 initRadio();
 initTv();
+initParty();
 
 export { cfg, showTab };
