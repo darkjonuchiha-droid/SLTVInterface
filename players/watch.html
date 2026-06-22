@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SL TV — Watch Party</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #000; overflow: hidden; }
+    iframe { width: 100vw; height: 100vh; border: 0; display: block; }
+    .msg {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      color: #fff; font-family: "Segoe UI", system-ui, sans-serif; font-size: 16px; opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <div class="msg" id="msg">Loading room…</div>
+  <iframe id="frame" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          referrerpolicy="origin-when-cross-origin"></iframe>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const src = p.get("src") || "";
+    // fs=1 currently has no extra effect here (the iframe already fills the surface),
+    // but the param is honored so the relayed display state stays consistent across pages.
+    const frame = document.getElementById("frame");
+    const msg = document.getElementById("msg");
+    if (!src) {
+      msg.textContent = "No room selected.";
+    } else {
+      frame.src = src;
+      frame.addEventListener("load", () => { msg.style.display = "none"; });
+    }
+  </script>
+</body>
+</html>
