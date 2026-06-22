@@ -19,6 +19,11 @@ string  gCap = "";          // current HTTP cap URL (changes on reset/restart)
 list    gTokens;            // stride 3: [token, role, permsCSV]
 integer MAX_TOKENS = 24;
 
+// ---- update notifications ----
+string  TV_VERSION = "2.0.0";   // bump when you ship; compared to data/version.json
+key     gVerReq;
+integer gNotified = FALSE;
+
 // ---- helpers ----------------------------------------------------------------
 
 ownerSay(string m) { llOwnerSay("[SLTV] " + m); }
@@ -161,20 +166,53 @@ favDel(string fkey) {
     put("favorites", llList2Json(JSON_ARRAY, keep));
 }
 
+// returns TRUE if version a ("x.y.z") is newer than b
+integer verNewer(string a, string b) {
+    list la = llParseString2List(a, ["."], []);
+    list lb = llParseString2List(b, ["."], []);
+    integer i;
+    for (i = 0; i < 3; i++) {
+        integer va = (integer)llList2String(la, i);
+        integer vb = (integer)llList2String(lb, i);
+        if (va > vb) return TRUE;
+        if (va < vb) return FALSE;
+    }
+    return FALSE;
+}
+checkUpdate() { gVerReq = llHTTPRequest(PAGE_BASE + "/data/version.json", [HTTP_METHOD, "GET"], ""); }
+
 // ---- lifecycle --------------------------------------------------------------
 default {
     state_entry() {
         if (lsd("perms") == "") put("perms", "radio,tv,party");   // default guest perms
         if (lsd("power") == "") put("power", "on");
         gTokens = [];
+        gNotified = FALSE;
         llListen(PAIR_CHANNEL, "", NULL_KEY, "");
         llReleaseURL(gCap);
         gCap = "";
         llRequestURL();
+        llSetTimerEvent(60.0);          // first update check shortly after start
     }
 
     on_rez(integer p) { llResetScript(); }
     changed(integer c) { if (c & CHANGED_REGION_START) llResetScript(); }
+
+    timer() {
+        llSetTimerEvent(21600.0);       // re-check roughly every 6 hours
+        checkUpdate();
+    }
+
+    http_response(key id, integer status, list meta, string rbody) {
+        if (id != gVerReq || status != 200) return;
+        string v = llJsonGetValue(rbody, ["version"]);
+        if (v == JSON_INVALID || v == "") return;
+        if (verNewer(v, TV_VERSION) && !gNotified) {
+            gNotified = TRUE;
+            ownerSay("Update available: v" + v + " (you have v" + TV_VERSION + "). "
+                + llJsonGetValue(rbody, ["notes"]) + "  " + llJsonGetValue(rbody, ["url"]));
+        }
+    }
 
     http_request(key id, string method, string body) {
         if (method == URL_REQUEST_GRANTED) {
