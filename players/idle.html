@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SL TV</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      background: radial-gradient(circle at 50% 40%, #15203a 0%, #04060c 75%);
+      color: #fff; font-family: "Segoe UI", system-ui, sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; overflow: hidden;
+    }
+    .logo { font-size: 64px; letter-spacing: 4px; font-weight: 800; }
+    .logo span { color: #ff8a00; }
+    .clock { font-size: 56px; margin-top: 16px; font-variant-numeric: tabular-nums; }
+    .date { color: #9aa0b4; margin-top: 6px; font-size: 18px; }
+    .hint { position: absolute; bottom: 28px; color: #6b7286; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="logo">SL<span>TV</span></div>
+  <div class="clock" id="clock">--:--</div>
+  <div class="date" id="date"></div>
+  <div class="hint">Pick a channel on your remote to begin.</div>
+  <script>
+    function tick() {
+      const now = new Date();
+      document.getElementById("clock").textContent =
+        now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      document.getElementById("date").textContent =
+        now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+    }
+    tick();
+    setInterval(tick, 10000);
+  </script>
+</body>
+</html>
