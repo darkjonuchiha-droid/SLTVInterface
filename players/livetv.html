@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SL TV — Live TV</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #000; }
+    body { display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+    video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    body.fs video { object-fit: cover; }   /* synced fullscreen: fill, crop bars */
+    .msg {
+      position: absolute; color: #fff; font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 16px; text-align: center; opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <video id="v" autoplay playsinline controls></video>
+  <div class="msg" id="msg">Tuning…</div>
+  <script src="../assets/hls.min.js"></script>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const src = p.get("src") || "";
+    if (p.get("fs") === "1") document.body.classList.add("fs");
+    const v = document.getElementById("v");
+    const msg = document.getElementById("msg");
+    function fail(t) { msg.textContent = t; msg.style.display = "block"; }
+    function ok() { msg.style.display = "none"; }
+    v.addEventListener("playing", ok);
+    if (!src) {
+      fail("No channel selected.");
+    } else if (window.Hls && window.Hls.isSupported() && /\.m3u8(\?|$)/i.test(src)) {
+      const hls = new window.Hls({ maxBufferLength: 10 });
+      hls.loadSource(src);
+      hls.attachMedia(v);
+      hls.on(window.Hls.Events.ERROR, (_e, data) => {
+        if (data && data.fatal) fail("Channel unavailable.");
+      });
+    } else {
+      // Native HLS (Safari) or a direct media URL.
+      v.src = src;
+      v.addEventListener("error", () => fail("Channel unavailable."));
+    }
+    document.body.addEventListener("click", () => v.play().catch(() => {}));
+  </script>
+</body>
+</html>
